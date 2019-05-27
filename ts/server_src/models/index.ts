@@ -1,12 +1,10 @@
 import { Sequelize } from "sequelize";
 import "dotenv/config"
 
-const database = (process.env.PGDATABASE as string)
-const username = (process.env.PGUSER as string)
-const password = (process.env.PGPASSWORD as string)
 const host = (process.env.PGHOST as string)
+const URI = (process.env.DATABASE_URL as string)
 
-export const sequelize = new Sequelize(database, username, password, {
+export const sequelize = new Sequelize(URI, {
   host: host,
   dialect: "postgres",
   dialectOptions: {
@@ -15,7 +13,7 @@ export const sequelize = new Sequelize(database, username, password, {
 })
 
 sequelize.authenticate()
-  .catch((err) => {
+  .catch((err: Error) => {
     console.error(err)
   })
 

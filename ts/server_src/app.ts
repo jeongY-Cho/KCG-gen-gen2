@@ -60,6 +60,34 @@ async function createMockData() {
             include: [models.Update]
         }
     )
+    let leg = await models.Legislator.create(
+        {
+            fullName: "Joe Shmoe",
+            firstName: "Joe",
+            lastName: "Shmoe",
+            title: "SENATOR",
+            district: 4,
+            party: "REPUBLICAN",
+            grades: [
+                {
+                    type: "rhetoric",
+                    grade: "F"
+                },
+                {
+                    type: "donation",
+                    grade: "A"
+                },
+                {
+                    type: "voting",
+                    grade: "C"
+                }
+            ]
+        },
+        // @ts-ignore
+        {
+            include: [models.Grade]
+        }
+    )
     await models.User.create(
         {
             username: "Mock 2",
@@ -69,17 +97,23 @@ async function createMockData() {
             updates: [
                 {
                     oldData: { type: 1, value: 2 },
-                    newData: { type: 2, value: 3 }
+                    newData: { type: 2, value: 3 },
+                    for: leg
                 },
                 {
                     oldData: { type: 5, value: 2 },
-                    newData: { type: 5, value: 3 }
+                    newData: { type: 5, value: 3 },
+                    for: leg
                 }
             ]
         },
         // @ts-ignore 
         {
-            include: [models.Update]
+            // @ts-ignore
+            include: [{
+                association: models.Update,
+                include: [models.Legislator]
+            }]
         }
     )
 }

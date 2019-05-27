@@ -12,7 +12,8 @@ export default (sequelize, DataTypes) => {
   })
 
   Update.associate = models => {
-    Update.belongsTo(models.User, { as: "updatedBy" })
+    Update.belongsTo(models.User, { as: "updatedBy" }),
+      Update.hasOne(models.Legislator, { as: "for" })
   }
   return Update
 }

@@ -2,11 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var sequelize_1 = require("sequelize");
 require("dotenv/config");
-var database = process.env.PGDATABASE;
-var username = process.env.PGUSER;
-var password = process.env.PGPASSWORD;
 var host = process.env.PGHOST;
-exports.sequelize = new sequelize_1.Sequelize(database, username, password, {
+var URI = process.env.DATABASE_URL;
+exports.sequelize = new sequelize_1.Sequelize(URI, {
     host: host,
     dialect: "postgres",
     dialectOptions: {

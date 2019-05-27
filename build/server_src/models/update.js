@@ -12,7 +12,8 @@ exports.default = (function (sequelize, DataTypes) {
         }
     });
     Update.associate = function (models) {
-        Update.belongsTo(models.User, { as: "updatedBy" });
+        Update.belongsTo(models.User, { as: "updatedBy" }),
+            Update.hasOne(models.Legislator, { as: "for" });
     };
     return Update;
 });

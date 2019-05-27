@@ -85,6 +85,7 @@ models_1.sequelize.sync({ force: force }).then(function () { return __awaiter(_t
 }); });
 function createMockData() {
     return __awaiter(this, void 0, void 0, function () {
+        var leg;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, models_1.default.User.create({
@@ -105,6 +106,34 @@ function createMockData() {
                     })];
                 case 1:
                     _a.sent();
+                    return [4 /*yield*/, models_1.default.Legislator.create({
+                            fullName: "Joe Shmoe",
+                            firstName: "Joe",
+                            lastName: "Shmoe",
+                            title: "SENATOR",
+                            district: 4,
+                            party: "REPUBLICAN",
+                            grades: [
+                                {
+                                    type: "rhetoric",
+                                    grade: "F"
+                                },
+                                {
+                                    type: "donation",
+                                    grade: "A"
+                                },
+                                {
+                                    type: "voting",
+                                    grade: "C"
+                                }
+                            ]
+                        }, 
+                        // @ts-ignore
+                        {
+                            include: [models_1.default.Grade]
+                        })];
+                case 2:
+                    leg = _a.sent();
                     return [4 /*yield*/, models_1.default.User.create({
                             username: "Mock 2",
                             fullName: "Johnny Appleseed",
@@ -113,19 +142,25 @@ function createMockData() {
                             updates: [
                                 {
                                     oldData: { type: 1, value: 2 },
-                                    newData: { type: 2, value: 3 }
+                                    newData: { type: 2, value: 3 },
+                                    for: leg
                                 },
                                 {
                                     oldData: { type: 5, value: 2 },
-                                    newData: { type: 5, value: 3 }
+                                    newData: { type: 5, value: 3 },
+                                    for: leg
                                 }
                             ]
                         }, 
                         // @ts-ignore 
                         {
-                            include: [models_1.default.Update]
+                            // @ts-ignore
+                            include: [{
+                                    association: models_1.default.Update,
+                                    include: [models_1.default.Legislator]
+                                }]
                         })];
-                case 2:
+                case 3:
                     _a.sent();
                     return [2 /*return*/];
             }
