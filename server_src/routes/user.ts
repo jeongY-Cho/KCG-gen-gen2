@@ -7,7 +7,7 @@ router.get("/me", (req, res) => {
   console.log(req);
 
   // @ts-ignore
-  return res.json(req.me)
+  return res.json(req.user)
 })
 
 router.put("/me", async (req, res) => {

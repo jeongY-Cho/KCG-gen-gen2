@@ -4,8 +4,16 @@ import models, { sequelize } from "./models";
 import update from "./models/update";
 import routes from "./routes"
 import bodyParser = require("body-parser");
+import path from "path"
 
 const app: Express.Application = Express()
+
+console.log(path.join(__dirname, "../client"));
+
+
+// serve static files
+app.use(Express.static(path.join(__dirname, "../client")))
+
 
 //middleware to get body
 app.use(Express.json())
@@ -26,10 +34,16 @@ app.use(async (req, res, next) => {
 app.use("/api/user", routes.user)
 app.use("/api/leg", routes.leg)
 
+app.get("/", (req, res) => {
+    console.log(__dirname);
+    console.log(process.env.PWD);
+
+    return res.sendFile(path.join(__dirname, "../client/index.html"))
+})
 
 
 // initialize database connection
-let force = true
+let force = false
 
 sequelize.sync({ force: force }).then(async () => {
     if (force) {

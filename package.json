@@ -5,7 +5,8 @@
   "main": "build/server_src/app.js",
   "scripts": {
     "test": "jest",
-    "start": "nodemon"
+    "dev": "nodemon",
+    "start": "node build/server_src/app.js"
   },
   "author": "Jeong Yeon Cho",
   "license": "MIT",
@@ -22,5 +23,8 @@
     "pg": "^7.11.0",
     "pg-hstore": "^2.3.2",
     "sequelize": "^5.8.6"
+  },
+  "engines": {
+    "node": "10.15.3"
   }
 }

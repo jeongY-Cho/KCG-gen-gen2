@@ -1,3 +1,5 @@
 .env
 node_modules
 curl_cmds.txt
+.DS_Store
+npm-debug.log

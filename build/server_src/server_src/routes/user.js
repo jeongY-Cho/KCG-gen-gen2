@@ -42,7 +42,7 @@ var router = express_1.Router();
 router.get("/me", function (req, res) {
     console.log(req);
     // @ts-ignore
-    return res.json(req.user);
+    return res.json(req.me);
 });
 router.put("/me", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var user, _i, _a, _b, key, value, updatedUser, err_1;

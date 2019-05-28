@@ -50,11 +50,7 @@ var express_1 = __importDefault(require("express"));
 require("dotenv/config");
 var models_1 = __importStar(require("./models"));
 var routes_1 = __importDefault(require("./routes"));
-var path_1 = __importDefault(require("path"));
 var app = express_1.default();
-console.log(path_1.default.join(__dirname, "../client"));
-// serve static files
-app.use(express_1.default.static(path_1.default.join(__dirname, "../client")));
 //middleware to get body
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
@@ -83,12 +79,10 @@ app.use(function (req, res, next) { return __awaiter(_this, void 0, void 0, func
 app.use("/api/user", routes_1.default.user);
 app.use("/api/leg", routes_1.default.leg);
 app.get("/", function (req, res) {
-    console.log(__dirname);
-    console.log(process.env.PWD);
-    return res.sendFile(path_1.default.join(__dirname, "../client/index.html"));
+    return res.sendFile("../client/index.html");
 });
 // initialize database connection
-var force = false;
+var force = true;
 models_1.sequelize.sync({ force: force }).then(function () { return __awaiter(_this, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
