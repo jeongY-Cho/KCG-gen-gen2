@@ -14,6 +14,10 @@ exports.default = (function (sequelize, DataTypes) {
             type: DataTypes.STRING,
             allowNull: false
         },
+        middleName: {
+            type: DataTypes.STRING,
+            defaultValue: ''
+        },
         title: {
             type: DataTypes.ENUM("SENATOR", "REPRESENTATIVE"),
             allowNull: false
@@ -29,6 +33,7 @@ exports.default = (function (sequelize, DataTypes) {
     });
     Legislator.associate = function (models) {
         Legislator.hasMany(models.Grade);
+        Legislator.hasMany(models.Update, { constraint: false });
     };
     return Legislator;
 });

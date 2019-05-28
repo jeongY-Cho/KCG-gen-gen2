@@ -7,6 +7,7 @@ var URI = process.env.DATABASE_URL;
 exports.sequelize = new sequelize_1.Sequelize(URI, {
     host: host,
     dialect: "postgres",
+    logging: false,
     dialectOptions: {
         ssl: true
     }

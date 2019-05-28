@@ -1,19 +1,21 @@
 
 export default (sequelize, DataTypes) => {
   const Update = sequelize.define("update", {
-    oldData: {
+    type: {
       type: DataTypes.JSON,
       allowNull: false
     },
-    newData: {
-      type: DataTypes.JSON,
-      allowNull: false
+    oldGrade: {
+      type: DataTypes.STRING,
+    },
+    newGrade: {
+      type: DataTypes.STRING,
     }
   })
 
   Update.associate = models => {
-    Update.belongsTo(models.User, { as: "updatedBy" }),
-      Update.hasOne(models.Legislator, { as: "for" })
+    Update.belongsTo(models.User)
+    Update.belongsTo(models.Legislator)
   }
   return Update
 }

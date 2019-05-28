@@ -5,6 +5,10 @@ exports.default = (function (sequelize, DataTypes) {
         username: {
             type: DataTypes.STRING,
             unique: true,
+            allowNull: false,
+            validate: {
+                not: [" ", "i"]
+            }
         },
         fullName: {
             type: DataTypes.STRING,
@@ -12,11 +16,15 @@ exports.default = (function (sequelize, DataTypes) {
         },
         email: {
             type: DataTypes.STRING,
-            allowNull: true
+            allowNull: false,
+            validate: {
+                isEmail: true
+            }
         },
-        authenticationLevel: {
+        authLevel: {
             type: DataTypes.INTEGER,
             defaultValue: 5,
+            allowNull: false
         },
         firstName: {
             type: DataTypes.STRING
@@ -31,6 +39,7 @@ exports.default = (function (sequelize, DataTypes) {
     });
     User.associate = function (models) {
         User.hasMany(models.Update);
+        User.hasMany(models.Grade, { as: "setter" });
     };
     return User;
 });

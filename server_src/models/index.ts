@@ -7,6 +7,7 @@ const URI = (process.env.DATABASE_URL as string)
 export const sequelize = new Sequelize(URI, {
   host: host,
   dialect: "postgres",
+  logging: false,
   dialectOptions: {
     ssl: true
   }

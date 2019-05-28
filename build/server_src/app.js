@@ -49,22 +49,36 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
 require("dotenv/config");
 var models_1 = __importStar(require("./models"));
+var routes_1 = __importDefault(require("./routes"));
 var app = express_1.default();
-app.get('/api', function (req, res) {
-    return res.json({
-        name: 'knfe',
-        msg: "snee"
+//middleware to get body
+app.use(express_1.default.json());
+app.use(express_1.default.urlencoded({ extended: true }));
+// middleware to assign user 
+app.use(function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+    var _a;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                // @ts-ignore
+                _a = req;
+                return [4 /*yield*/, models_1.default.User.findOne({
+                        where: {
+                            username: "Mock_1"
+                        }
+                    })];
+            case 1:
+                // @ts-ignore
+                _a.user = _b.sent();
+                next();
+                return [2 /*return*/];
+        }
     });
-});
-app.post('/api', function (req, res) {
-    return res.send('Received a POST HTTP method');
-});
-app.put('/api', function (req, res) {
-    return res.send('Received a PUT HTTP method');
-});
-app.delete('/api', function (req, res) {
-    return res.send('Received a DELETE HTTP method');
-});
+}); });
+// route for user endpoint 
+app.use("/api/user", routes_1.default.user);
+app.use("/api/leg", routes_1.default.leg);
+// initialize database connection
 var force = true;
 models_1.sequelize.sync({ force: force }).then(function () { return __awaiter(_this, void 0, void 0, function () {
     return __generator(this, function (_a) {
@@ -85,27 +99,42 @@ models_1.sequelize.sync({ force: force }).then(function () { return __awaiter(_t
 }); });
 function createMockData() {
     return __awaiter(this, void 0, void 0, function () {
-        var leg;
+        var user1, user2, update, leg, grade1, grade2, grade3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, models_1.default.User.create({
-                        username: "Mock 1",
+                        username: "Mock_1",
                         fullName: "Johnny Appleseed",
                         firstName: "Johnny",
                         lastName: "Appleseed",
-                        updates: [
-                            {
-                                oldData: { type: 1, value: 2 },
-                                newData: { type: 2, value: 3 }
-                            }
-                        ]
-                    }, 
+                        email: "123@123.com",
+                        authenticationLevel: 0,
+                    })
                     // @ts-ignore
-                    {
-                        include: [models_1.default.Update]
-                    })];
+                ];
                 case 1:
-                    _a.sent();
+                    user1 = _a.sent();
+                    return [4 /*yield*/, models_1.default.User.create({
+                            username: "Mock_2",
+                            fullName: "Johnny Applesasdfeed",
+                            firstName: "Johnnasdy",
+                            lastName: "Applasdfeseed",
+                            email: "123@1asdf23.com",
+                            authenticationsLevel: 0,
+                        })
+                        // @ts-ignore
+                    ];
+                case 2:
+                    user2 = _a.sent();
+                    return [4 /*yield*/, models_1.default.Update.create({
+                            type: "rhetoric",
+                            oldGrade: "B",
+                            newGrade: "A"
+                        })
+                        // @ts-ignore
+                    ];
+                case 3:
+                    update = _a.sent();
                     return [4 /*yield*/, models_1.default.Legislator.create({
                             fullName: "Joe Shmoe",
                             firstName: "Joe",
@@ -127,40 +156,72 @@ function createMockData() {
                                     grade: "C"
                                 }
                             ]
-                        }, 
+                        })
                         // @ts-ignore
-                        {
-                            include: [models_1.default.Grade]
-                        })];
-                case 2:
+                    ];
+                case 4:
                     leg = _a.sent();
-                    return [4 /*yield*/, models_1.default.User.create({
-                            username: "Mock 2",
-                            fullName: "Johnny Appleseed",
-                            firstName: "Johnny",
-                            lastName: "Appleseed",
-                            updates: [
-                                {
-                                    oldData: { type: 1, value: 2 },
-                                    newData: { type: 2, value: 3 },
-                                    for: leg
-                                },
-                                {
-                                    oldData: { type: 5, value: 2 },
-                                    newData: { type: 5, value: 3 },
-                                    for: leg
-                                }
-                            ]
-                        }, 
-                        // @ts-ignore 
-                        {
-                            // @ts-ignore
-                            include: [{
-                                    association: models_1.default.Update,
-                                    include: [models_1.default.Legislator]
-                                }]
-                        })];
-                case 3:
+                    return [4 /*yield*/, models_1.default.Grade.create({
+                            type: "rhetoric",
+                            grade: "A"
+                        })
+                        // @ts-ignore
+                    ];
+                case 5:
+                    grade1 = _a.sent();
+                    return [4 /*yield*/, models_1.default.Grade.create({
+                            type: "donation",
+                            grade: "F"
+                        })
+                        // @ts-ignore
+                    ];
+                case 6:
+                    grade2 = _a.sent();
+                    return [4 /*yield*/, models_1.default.Grade.create({
+                            type: "voting",
+                            grade: "F"
+                        })
+                        // await update.set("legislatorId", user.get(""))
+                    ];
+                case 7:
+                    grade3 = _a.sent();
+                    // await update.set("legislatorId", user.get(""))
+                    return [4 /*yield*/, grade1.set("legislatorId", leg.get('id'))];
+                case 8:
+                    // await update.set("legislatorId", user.get(""))
+                    _a.sent();
+                    return [4 /*yield*/, grade1.set("userId", user1.get('id'))];
+                case 9:
+                    _a.sent();
+                    return [4 /*yield*/, grade1.save()];
+                case 10:
+                    _a.sent();
+                    return [4 /*yield*/, grade2.set("legislatorId", leg.get('id'))];
+                case 11:
+                    _a.sent();
+                    return [4 /*yield*/, grade2.set("userId", user2.get('id'))];
+                case 12:
+                    _a.sent();
+                    return [4 /*yield*/, grade2.save()];
+                case 13:
+                    _a.sent();
+                    return [4 /*yield*/, grade3.set("legislatorId", leg.get('id'))];
+                case 14:
+                    _a.sent();
+                    return [4 /*yield*/, grade3.set("userId", user1.get('id'))];
+                case 15:
+                    _a.sent();
+                    return [4 /*yield*/, grade3.save()];
+                case 16:
+                    _a.sent();
+                    return [4 /*yield*/, update.set("userId", user1.get("id"))];
+                case 17:
+                    _a.sent();
+                    return [4 /*yield*/, update.set("legislatorId", leg.get("id"))];
+                case 18:
+                    _a.sent();
+                    return [4 /*yield*/, update.save()];
+                case 19:
                     _a.sent();
                     return [2 /*return*/];
             }

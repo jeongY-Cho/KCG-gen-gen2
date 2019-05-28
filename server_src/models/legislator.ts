@@ -12,6 +12,10 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
+    middleName: {
+      type: DataTypes.STRING,
+      defaultValue: ''
+    },
     title: {
       type: DataTypes.ENUM("SENATOR", "REPRESENTATIVE"),
       allowNull: false
@@ -27,6 +31,7 @@ export default (sequelize, DataTypes) => {
   })
   Legislator.associate = models => {
     Legislator.hasMany(models.Grade)
+    Legislator.hasMany(models.Update, { constraint: false })
   }
 
   return Legislator
