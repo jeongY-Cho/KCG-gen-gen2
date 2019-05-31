@@ -24,6 +24,27 @@ router.get("/:id", async (req, res) => {
   }))
 })
 
+router.get("/:session/:title/:district", async (req, res) => {
+  console.log(JSON.stringify(req.params));
+
+  try {
+    // @ts-ignore
+    return res.send(await models.Legislator.findOne({
+      where: {
+        title: req.params.title,
+        district: req.params.district
+      },
+      include: [models.Grade, models.Update]
+    }))
+
+  } catch (err) {
+    console.log(err.original);
+
+    res.status(400).send(err)
+
+  }
+})
+
 router.post("/new", async (req, res) => {
   // @ts-ignore
   return res.send(await models.Legislator.create({
@@ -53,7 +74,7 @@ router.delete("/:id", async (req, res) => {
     })
     return res.send()
   } catch (err) {
-    return res.send(err)
+    return res.status(400).send(err)
   }
 })
 

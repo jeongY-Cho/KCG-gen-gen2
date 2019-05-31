@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { sequelize } from "../models"
+import { sequelize } from "../../models"
 
 const router = Router()
 
@@ -7,7 +7,7 @@ router.get("/me", (req, res) => {
   console.log(req);
 
   // @ts-ignore
-  return res.json(req.user)
+  return res.json(req.session.user)
 })
 
 router.put("/me", async (req, res) => {
@@ -17,7 +17,7 @@ router.put("/me", async (req, res) => {
   let user = await sequelize.models.user.findOne({
     where: {
       // @ts-ignore
-      username: req.user.username
+      username: req.session.user.username
     }
   })
 
@@ -29,7 +29,7 @@ router.put("/me", async (req, res) => {
     return res.send(updatedUser)
 
   } catch (err) {
-    return res.send(err)
+    return res.status(400).send(err)
   }
 })
 
@@ -40,7 +40,7 @@ router.post("/new", async (req, res) => {
   if (!middleName) {
     middleName = ''
   }
-  let fullName = `${firstName ? firstName + " " : ''}${middleName ? middleName.substring(0, 1) + " " : ''}${lastName}`
+  let fullName = `${firstName ? firstName + " " : ''}${middleName ? middleName.substring(0, 1) + ". " : ''}${lastName}`
 
   try {
     // @ts-ignore
@@ -50,7 +50,9 @@ router.post("/new", async (req, res) => {
     return res.send(newUser)
 
   } catch (err) {
-    return res.send(err)
+    console.log(err);
+
+    return res.status(400).send(err)
   }
 })
 
@@ -64,15 +66,26 @@ router.get("/:username", async (req, res) => {
     include: [sequelize.models.update]
   }))
 })
+
 router.put("/:username", async (req, res) => {
 
   // @ts-ignore
-  return res.send(await sequelize.models.user.findOne({
+  let user = await sequelize.models.user.findOne({
     where: {
       username: req.params.username
-    },
-    include: [sequelize.models.update]
-  }))
+    }
+  })
+  if (req.session.user.get("authLevel") > user.get("authLevel")) {
+    return res.status(403).send({ reason: "User authentication level lower than target" })
+  }
+
+  for (let [key, value] of Object.entries(req.body)) {
+    await user.set(key, value)
+  }
+  await user.save()
+
+  return res.send(user)
+
 })
 
 

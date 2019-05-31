@@ -13,6 +13,7 @@ exports.default = (function (sequelize, DataTypes) {
     });
     Grade.associate = function (models) {
         Grade.belongsTo(models.Legislator, { as: "legislator" });
+        Grade.belongsTo(models.User, { as: "setter" });
     };
     return Grade;
 });

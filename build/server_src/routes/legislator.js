@@ -88,6 +88,35 @@ router.get("/:id", function (req, res) { return __awaiter(_this, void 0, void 0,
         }
     });
 }); });
+router.get("/:session/:title/:district", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+    var _a, _b, err_1;
+    return __generator(this, function (_c) {
+        switch (_c.label) {
+            case 0:
+                console.log(JSON.stringify(req.params));
+                _c.label = 1;
+            case 1:
+                _c.trys.push([1, 3, , 4]);
+                _b = (_a = res).send;
+                return [4 /*yield*/, models_1.default.Legislator.findOne({
+                        where: {
+                            title: req.params.title,
+                            district: req.params.district
+                        },
+                        include: [models_1.default.Grade, models_1.default.Update]
+                    })];
+            case 2: 
+            // @ts-ignore
+            return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+            case 3:
+                err_1 = _c.sent();
+                console.log(err_1.original);
+                res.status(400).send(err_1);
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); });
 router.post("/new", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var _a, _b;
     return __generator(this, function (_c) {
@@ -129,7 +158,7 @@ router.put("/:id", function (req, res) { return __awaiter(_this, void 0, void 0,
     });
 }); });
 router.delete("/:id", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-    var err_1;
+    var err_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -143,8 +172,8 @@ router.delete("/:id", function (req, res) { return __awaiter(_this, void 0, void
                 _a.sent();
                 return [2 /*return*/, res.send()];
             case 2:
-                err_1 = _a.sent();
-                return [2 /*return*/, res.send(err_1)];
+                err_2 = _a.sent();
+                return [2 /*return*/, res.status(400).send(err_2)];
             case 3: return [2 /*return*/];
         }
     });

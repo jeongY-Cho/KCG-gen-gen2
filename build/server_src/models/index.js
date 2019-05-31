@@ -4,6 +4,7 @@ var sequelize_1 = require("sequelize");
 require("dotenv/config");
 var host = process.env.PGHOST;
 var URI = process.env.DATABASE_URL;
+console.log(process.env.NODE_ENV);
 exports.sequelize = new sequelize_1.Sequelize(URI, {
     host: host,
     dialect: "postgres",

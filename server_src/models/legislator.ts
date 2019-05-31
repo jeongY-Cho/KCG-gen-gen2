@@ -20,6 +20,10 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.ENUM("SENATOR", "REPRESENTATIVE"),
       allowNull: false
     },
+    session: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
     district: {
       type: DataTypes.INTEGER,
       allowNull: false
@@ -28,6 +32,28 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.ENUM("DEMOCRAT", "REPUBLICAN", "INDEPENDENT"),
       allowNull: false
     },
+    imgLink: {
+      type: DataTypes.STRING,
+      validate: {
+        isUrl: true
+      }
+    },
+    email: {
+      type: DataTypes.STRING,
+      validate: {
+        isEmail: true
+      }
+    },
+    legPage: {
+      type: DataTypes.STRING,
+      validate: {
+        isUrl: true
+      }
+    },
+    phoneNum: {
+      type: DataTypes.STRING
+    },
+    notes: DataTypes.TEXT
   })
   Legislator.associate = models => {
     Legislator.hasMany(models.Grade)
@@ -36,3 +62,4 @@ export default (sequelize, DataTypes) => {
 
   return Legislator
 }
+
