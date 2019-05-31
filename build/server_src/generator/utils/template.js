@@ -12,7 +12,7 @@ exports.default = {
     "fonts": {
         "medium": {
             "file": "./build/server_src/generator/utils/Fonts/name_font.fnt",
-            "font": "./build/generator/utils/Fonts/Monsterrat-Light.ttf",
+            "font": "./build/server_src/generator/utils/Fonts/Monsterrat-Light.ttf",
             "size": 44,
             "color": [40, 84, 86]
         },
@@ -71,5 +71,5 @@ exports.default = {
         "x": 445,
         "y": 598
     },
-    "template": "./build/server_src/generator/utils/kcggrading_blank.png"
+    "template": "./utils/kcggrading_blank.png"
 };

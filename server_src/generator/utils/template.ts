@@ -10,26 +10,26 @@ export default {
     "nameMaxWidth": 400,
     "fonts": {
         "medium": {
-            "file": "./utils/Fonts/name_font.fnt",
-            "font": "./utils/Fonts/Monsterrat-Light.ttf",
+            "file": "./build/server_src/generator/utils/Fonts/name_font.fnt",
+            "font": "./build/server_src/generator/utils/Fonts/Monsterrat-Light.ttf",
             "size": 44,
             "color": [40, 84, 86]
         },
         "small": {
-            "file": "./utils/Fonts/district_font.fnt",
-            "font": "./utils/Fonts/Poppins-Light.ttf",
+            "file": "./build/server_src/generator/utils/Fonts/district_font.fnt",
+            "font": "./build/server_src/generator/utils/Fonts/Poppins-Light.ttf",
             "size": 30,
             "color": [40, 84, 86]
         },
         "xsmall": {
-            "file": "./utils/Fonts/updated_font.fnt",
-            "font": "./utils/Fonts/Poppins-Light.ttf",
+            "file": "./build/server_src/generator/utils/Fonts/updated_font.fnt",
+            "font": "./build/server_src/generator/utils/Fonts/Poppins-Light.ttf",
             "size": 16,
             "color": [252, 252, 237]
         },
         "large": {
-            "file": "./utils/Fonts/grade_font.fnt",
-            "font": "./utils/Fonts/Monsterrat-Light.ttf",
+            "file": "./build/server_src/generator/utils/Fonts/grade_font.fnt",
+            "font": "./build/server_src/generator/utils/Fonts/Monsterrat-Light.ttf",
             "size": 128,
             "color": [40, 84, 86]
         }
