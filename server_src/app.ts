@@ -47,6 +47,10 @@ app.use("/generator", routes.generator)
 
 app.post("/login", async (req, res) => {
     // @ts-ignore
+    if (req.session.isLoggedIn) {
+        return res.status(200).send()
+    }
+    // @ts-ignore
     let user = await models.User.findOne({
         where: {
             username: req.body.username
@@ -71,9 +75,6 @@ app.post("/logout", async (req, res) => {
 
 
 app.get("*", (req, res) => {
-    console.log(__dirname);
-    console.log(process.env.PWD);
-
     return res.sendFile(path.join(__dirname, "../client/index.html"))
 })
 

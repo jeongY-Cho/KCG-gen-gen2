@@ -2,7 +2,7 @@ import { observable, action } from "mobx";
 import Axios from "axios";
 
 
-interface User {
+export interface IUser {
   id: Number,
   username: String,
   fullName: String,
@@ -11,8 +11,8 @@ interface User {
   firstName: String,
   lastName: String,
   middleName: String,
-  createdAt: Date,
-  upatedAt: Date,
+  createdAt: string,
+  upatedAt: string,
 }
 
 interface INewUser {
@@ -25,7 +25,7 @@ interface INewUser {
 
 
 export default class UserStore {
-  @observable user: User | {} = {}
+  @observable user: IUser | {} = {}
   @observable isLoggedIn: Boolean = false
 
   @action.bound async login(username: String) {
@@ -44,6 +44,7 @@ export default class UserStore {
   }
   @action.bound logout() {
     this.isLoggedIn = false
+    this.user = {}
   }
   @action.bound async newUser(data: INewUser) {
     await Axios.post("/api/user/new", data)

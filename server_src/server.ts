@@ -1,8 +1,8 @@
 import app from "./app"
-import { sequelize } from "./models"
+import models, { sequelize } from "./models"
 
-// reinstantiate database (ignored in dev)
-let force = false
+// reinstantiate database (ignored in prod, and testing)
+let force = true
 
 switch (process.env.NODE_ENV) {
   case "PRODUCTION": {
@@ -101,15 +101,15 @@ async function createMockData() {
 
   // await update.set("legislatorId", user.get(""))
   await grade1.set("legislatorId", leg.get('id'))
-  await grade1.set("userId", user1.get('id'))
+  await grade1.set("setterId", user1.get('id'))
   await grade1.save()
 
   await grade2.set("legislatorId", leg.get('id'))
-  await grade2.set("userId", user2.get('id'))
+  await grade2.set("setterId", user2.get('id'))
   await grade2.save()
 
   await grade3.set("legislatorId", leg.get('id'))
-  await grade3.set("userId", user1.get('id'))
+  await grade3.set("setterId", user1.get('id'))
   await grade3.save()
 
   await update.set("userId", user1.get("id"))

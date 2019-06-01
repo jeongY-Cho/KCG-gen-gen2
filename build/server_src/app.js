@@ -80,11 +80,16 @@ app.post("/login", function (req, res) { return __awaiter(_this, void 0, void 0,
     var user;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, models_1.default.User.findOne({
-                    where: {
-                        username: req.body.username
-                    }
-                })];
+            case 0:
+                // @ts-ignore
+                if (req.session.isLoggedIn) {
+                    return [2 /*return*/, res.status(200).send()];
+                }
+                return [4 /*yield*/, models_1.default.User.findOne({
+                        where: {
+                            username: req.body.username
+                        }
+                    })];
             case 1:
                 user = _a.sent();
                 if (user) {
@@ -111,8 +116,6 @@ app.post("/logout", function (req, res) { return __awaiter(_this, void 0, void 0
     });
 }); });
 app.get("*", function (req, res) {
-    console.log(__dirname);
-    console.log(process.env.PWD);
     return res.sendFile(path_1.default.join(__dirname, "../client/index.html"));
 });
 exports.default = app;

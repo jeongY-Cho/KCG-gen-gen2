@@ -57,6 +57,7 @@ export default (sequelize, DataTypes) => {
   })
   Legislator.associate = models => {
     Legislator.hasMany(models.Grade)
+    Legislator.belongsTo(models.User, { as: "updatedBy", constraint: false })
     Legislator.hasMany(models.Update, { constraint: false })
   }
 

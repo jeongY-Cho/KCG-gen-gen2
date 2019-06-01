@@ -21,26 +21,15 @@ router.use(rateLimit({
   }
 }))
 
-// 
+
+
 router.get("/", async (req, res) => {
   // @ts-ignore
-  let data = await getReportCard(...req.query)
-
-  // @ts-ignore
-  let fileName = setFileName(data.name, data.session, data.title, data.district)
-  res.set('Content-disposition', 'attachment; filename=' + fileName);
-
-  return res.send(await generator.makeReportCard(data))
-})
-
-router.get("/:id", async (req, res) => {
-  // @ts-ignore
   let leg = await models.Legislator.findOne({
-    where: {
-      id: req.params.id
-    },
+    where: req.query,
     include: [models.Grade]
   })
+  console.log(leg);
 
   var data: IReportCardData = {
     imgLink: leg.get("imgLink"),
@@ -60,8 +49,17 @@ router.get("/:id", async (req, res) => {
   }
 
   let fileName = setFileName(data.name, leg.get("session"), data.title, data.district)
-  res.set('Content-disposition', 'attachment; filename=' + fileName);
-  return res.send(await generator.makeReportCard(data))
+  console.log(fileName);
+
+  if (leg) {
+    res.set('Content-disposition', 'inline; filename=' + fileName);
+    res.set("Content-Type", "image/jpeg")
+    res.set("X-suggested-filename", fileName)
+    return res.send(await generator.makeReportCard(data))
+
+  } else {
+    return res.status(400).send({ reason: "No Legislator with specified queries found" })
+  }
 })
 
 router.get("/:session/:title/:district", async (req, res) => {
@@ -71,6 +69,8 @@ router.get("/:session/:title/:district", async (req, res) => {
 
   let fileName = setFileName(data.name, data.session, data.title, data.district)
   res.set('Content-disposition', 'attachment; filename=' + fileName);
+  res.set("X-suggested-filename", fileName)
+  res.set("Content-Type", "image/jpeg")
   return res.send(await generator.makeReportCard(data))
 })
 

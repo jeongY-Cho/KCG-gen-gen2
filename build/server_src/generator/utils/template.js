@@ -71,5 +71,5 @@ exports.default = {
         "x": 445,
         "y": 598
     },
-    "template": "./utils/kcggrading_blank.png"
+    "template": "./build/server_src/generator/utils/kcggrading_blank.png"
 };

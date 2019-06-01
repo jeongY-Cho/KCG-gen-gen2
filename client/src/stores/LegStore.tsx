@@ -1,5 +1,20 @@
 import { observable, action } from "mobx";
+import { IUser } from "./UserStore"
 import Axios from "axios";
+
+
+
+
+export interface IGrade {
+  id: number,
+  type: string,
+  grade: string,
+  createdAt: string,
+  updatedAt: string,
+  legislatorId: string,
+  setterId: string,
+  setter: IUser
+}
 
 
 export interface ILeg {
@@ -17,13 +32,17 @@ export interface ILeg {
   legPage: string,
   phoneNum: string,
   notes: string,
-  createdAt: Date,
-  updatedAt: Date
+  createdAt: string,
+  updatedAt: string
+  grades: IGrade[],
+
 }
 
 export default class LegStore {
+
   @observable legs: ILeg[] = []
-  @observable current: ILeg | {} = {}
+  // @ts-ignore
+  @observable current: ILeg = {}
 
   @action.bound async getOne(id: string) {
     let response = await Axios.get("/api/leg", {
@@ -43,6 +62,15 @@ export default class LegStore {
     })
 
     this.legs = response.data
+  }
+
+  @action.bound async updateLeg(data: ILeg) {
+    let response = await Axios.put(`/api/leg/${data.id}`, data)
+
+    console.log(response.data);
+
+    this.current = response.data
+
   }
 }
 

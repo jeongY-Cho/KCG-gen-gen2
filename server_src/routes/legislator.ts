@@ -14,55 +14,155 @@ router.get("/search", async (req, res) => {
   }))
 })
 
-router.get("/:id", async (req, res) => {
+router.get("/", async (req, res) => {
   // @ts-ignore
   return res.send(await models.Legislator.findOne({
-    where: {
-      id: req.params.id
-    },
-    include: [models.Grade]
+    where: req.query,
+    include: [{
+      model: models.Grade,
+      include: [{
+        model: models.User, as: "setter"
+      }]
+    }]
   }))
 })
 
-router.get("/:session/:title/:district", async (req, res) => {
-  console.log(JSON.stringify(req.params));
-
-  try {
-    // @ts-ignore
-    return res.send(await models.Legislator.findOne({
-      where: {
-        title: req.params.title,
-        district: req.params.district
-      },
-      include: [models.Grade, models.Update]
-    }))
-
-  } catch (err) {
-    console.log(err.original);
-
-    res.status(400).send(err)
-
-  }
+router.get("/:id", async (req, res) => {
+  // @ts-ignore
+  return res.send(await models.Legislator.findOne({
+    where: req.params.id,
+    include: [{
+      model: models.Grade,
+      include: [{
+        model: models.User, as: "setter"
+      }]
+    }]
+  }))
 })
 
 router.post("/new", async (req, res) => {
   // @ts-ignore
-  return res.send(await models.Legislator.create({
-    ...req.body
+
+  let { firstName, middleName, lastName, title, session, party, imgLink, email, legPage, phoneNum, notes, grades } = req.body
+  // @ts-ignore set leg data
+  let newLeg = await models.Legislator.create({
+    updatedBy: req.session.user.id,
+    fullName: `${firstName ? firstName + " " : ''}${middleName ? middleName.substring(0, 1) + ". " : ''}${lastName}`,
+    firstName, middleName, lastName, title, session, party, imgLink, email, legPage, phoneNum, notes
+  })
+
+  // set grades
+  for (let grade of grades) {
+    // @ts-ignore new grade model
+    let newGrade = await models.Grade.create({
+      type: grade.type,
+      grade: grade.grade,
+      legislatorId: newLeg.get("id"),
+      setterId: req.session.user.id
+    })
+  }
+  // @ts-ignore
+  return res.send(await models.Legislator.findOne({
+    where: { id: newLeg.get("id") },
+    include: [
+      {
+        model: models.Grade,
+        include: [{ model: models.User, as: "setter" }]
+      },
+      {
+        model: models.User,
+        as: "updatedBy"
+      }
+    ]
   }))
 })
 
 router.put("/:id", async (req, res) => {
+  console.log(req.body);
+
   // @ts-ignore
   let leg = await models.Legislator.findOne({
-    where: req.params.id
+    where: {
+      id: req.params.id
+    },
+    include: [{
+      model: models.Grade,
+      include: [{ model: models.User, as: "setter" }]
+    },
+    {
+      model: models.User,
+      as: "updatedBy"
+    }
+    ]
   })
+  console.log(req.body);
 
-  for (let [key, value] of Object.entries(req.body)) {
+  let { id, firstName, middleName, lastName, grades, createdAt, updatedAt, ...rest } = req.body
+
+  // set new first name
+  await leg.set("firstName", firstName)
+  await leg.set("middleName", middleName)
+  await leg.set("lastName", lastName)
+  await leg.set("fullName", `${firstName ? firstName + " " : ''}${middleName ? middleName.substring(0, 1) + ". " : ''}${lastName}`)
+
+  // set grades 
+  for (let gradeUpdate of grades) {
+    let { type, grade } = gradeUpdate
+    // @ts-ignore
+    let gradeModel = await models.Grade.findOne({
+      where: {
+        type: type,
+        legislatorId: req.params.id
+      }
+    })
+    // if changed set grade, new update
+    if (grade !== gradeModel.get("grade")) {
+      let oldGrade = gradeModel.get("grade")
+      // set grade
+      await gradeModel.set("grade", grade)
+      // set who updated 
+      await gradeModel.set("setterId", req.session.user.id)
+      await gradeModel.save()
+
+      // @ts-ignore new update
+      await models.Update.create({
+        type: type,
+        oldGrade: oldGrade,
+        newGrade: grade,
+        userId: req.session.user.id,
+        legislatorId: leg.get("id")
+      })
+    }
+  }
+  // set updated key values
+  for (let [key, value] of Object.entries(rest)) {
+    // @ts-ignore
+    if (value === '') {
+      // @ts-ignore
+      value = null
+    }
+    console.log(key, value);
     await leg.set(key, value)
   }
-  let updatedLeg = leg.save()
-  return res.send(updatedLeg)
+  // set who updated
+  await leg.set("setterId", req.session.user.id)
+  // save leg
+  await leg.save()
+
+  // @ts-ignore return updated leg and grades 
+  return res.send(await models.Legislator.findOne({
+    where: { id: req.params.id },
+    include: [
+      {
+        model: models.Grade,
+        include: [{ model: models.User, as: "setter" }]
+      },
+      {
+        model: models.User,
+        as: "updatedBy"
+      }
+    ]
+  }))
 })
 
 router.delete("/:id", async (req, res) => {
@@ -72,7 +172,7 @@ router.delete("/:id", async (req, res) => {
         id: req.params.id
       }
     })
-    return res.send()
+    return res.sendStatus(200)
   } catch (err) {
     return res.status(400).send(err)
   }

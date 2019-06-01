@@ -57,34 +57,17 @@ router.use(express_rate_limit_1.default({
         }
     }
 }));
-// 
 router.get("/", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-    var data, fileName, _a, _b;
-    return __generator(this, function (_c) {
-        switch (_c.label) {
-            case 0: return [4 /*yield*/, getReportCard.apply(void 0, req.query)];
-            case 1:
-                data = _c.sent();
-                fileName = setFileName(data.name, data.session, data.title, data.district);
-                res.set('Content-disposition', 'attachment; filename=' + fileName);
-                _b = (_a = res).send;
-                return [4 /*yield*/, generator_1.default.makeReportCard(data)];
-            case 2: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
-        }
-    });
-}); });
-router.get("/:id", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var leg, data, _i, _a, grade, type, score, fileName, _b, _c;
     return __generator(this, function (_d) {
         switch (_d.label) {
             case 0: return [4 /*yield*/, models_1.default.Legislator.findOne({
-                    where: {
-                        id: req.params.id
-                    },
+                    where: req.query,
                     include: [models_1.default.Grade]
                 })];
             case 1:
                 leg = _d.sent();
+                console.log(leg);
                 data = {
                     imgLink: leg.get("imgLink"),
                     title: leg.get("title"),
@@ -101,10 +84,15 @@ router.get("/:id", function (req, res) { return __awaiter(_this, void 0, void 0,
                     data.grades[type] = score;
                 }
                 fileName = setFileName(data.name, leg.get("session"), data.title, data.district);
-                res.set('Content-disposition', 'attachment; filename=' + fileName);
+                console.log(fileName);
+                if (!leg) return [3 /*break*/, 3];
+                res.set('Content-disposition', 'inline; filename=' + fileName);
+                res.set("Content-Type", "image/jpeg");
+                res.set("X-suggested-filename", fileName);
                 _c = (_b = res).send;
                 return [4 /*yield*/, generator_1.default.makeReportCard(data)];
             case 2: return [2 /*return*/, _c.apply(_b, [_d.sent()])];
+            case 3: return [2 /*return*/, res.status(400).send({ reason: "No Legislator with specified queries found" })];
         }
     });
 }); });
@@ -119,6 +107,8 @@ router.get("/:session/:title/:district", function (req, res) { return __awaiter(
                 data = _d.sent();
                 fileName = setFileName(data.name, data.session, data.title, data.district);
                 res.set('Content-disposition', 'attachment; filename=' + fileName);
+                res.set("X-suggested-filename", fileName);
+                res.set("Content-Type", "image/jpeg");
                 _c = (_b = res).send;
                 return [4 /*yield*/, generator_1.default.makeReportCard(data)];
             case 2: return [2 /*return*/, _c.apply(_b, [_d.sent()])];

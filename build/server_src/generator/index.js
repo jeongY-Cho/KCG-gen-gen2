@@ -33,7 +33,7 @@ function main() {
         imgLink: "http://leg.colorado.gov/sites/default/files/styles/width_300/public/2019a_arndt%2C%20jeni.jpg?itok=x-tF-KT0",
         title: "SENATOR",
         district: 1,
-        updatedAt: new Date(Date.now()),
+        updatedAt: String(Date.now()),
         session: 72,
         name: "Joe Shmoe fen asi n fe dnfe e f ",
         grades: {

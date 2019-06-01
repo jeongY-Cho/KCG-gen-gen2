@@ -59,6 +59,7 @@ exports.default = (function (sequelize, DataTypes) {
     });
     Legislator.associate = function (models) {
         Legislator.hasMany(models.Grade);
+        Legislator.belongsTo(models.User, { as: "updatedBy", constraint: false });
         Legislator.hasMany(models.Update, { constraint: false });
     };
     return Legislator;

@@ -28,7 +28,7 @@ export interface IReportCardData {
   session: number;
   imgLink: string,
   title: string,
-  updatedAt: Date,
+  updatedAt: string,
   name: string,
   district: number,
   grades: {

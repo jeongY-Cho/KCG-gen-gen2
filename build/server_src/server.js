@@ -37,12 +37,19 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var app_1 = __importDefault(require("./app"));
-var models_1 = require("./models");
-// reinstantiate database (ignored in dev)
-var force = false;
+var models_1 = __importStar(require("./models"));
+// reinstantiate database (ignored in prod, and testing)
+var force = true;
 switch (process.env.NODE_ENV) {
     case "PRODUCTION": {
         force = false;
@@ -74,7 +81,7 @@ function createMockData() {
         var user1, user2, update, leg, grade1, grade2, grade3;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, models.User.create({
+                case 0: return [4 /*yield*/, models_1.default.User.create({
                         username: "test1",
                         fullName: "first last",
                         firstName: "first",
@@ -87,7 +94,7 @@ function createMockData() {
                 ];
                 case 1:
                     user1 = _a.sent();
-                    return [4 /*yield*/, models.User.create({
+                    return [4 /*yield*/, models_1.default.User.create({
                             username: "test2",
                             fullName: "Johnny Applesasdfeed",
                             firstName: "Johnnasdy",
@@ -99,7 +106,7 @@ function createMockData() {
                     ];
                 case 2:
                     user2 = _a.sent();
-                    return [4 /*yield*/, models.Update.create({
+                    return [4 /*yield*/, models_1.default.Update.create({
                             type: "rhetoric",
                             oldGrade: "B",
                             newGrade: "A"
@@ -108,7 +115,7 @@ function createMockData() {
                     ];
                 case 3:
                     update = _a.sent();
-                    return [4 /*yield*/, models.Legislator.create({
+                    return [4 /*yield*/, models_1.default.Legislator.create({
                             fullName: "Joe Shmoe",
                             firstName: "Joe",
                             lastName: "Shmoe",
@@ -136,7 +143,7 @@ function createMockData() {
                     ];
                 case 4:
                     leg = _a.sent();
-                    return [4 /*yield*/, models.Grade.create({
+                    return [4 /*yield*/, models_1.default.Grade.create({
                             type: "rhetoric",
                             grade: "A"
                         })
@@ -144,7 +151,7 @@ function createMockData() {
                     ];
                 case 5:
                     grade1 = _a.sent();
-                    return [4 /*yield*/, models.Grade.create({
+                    return [4 /*yield*/, models_1.default.Grade.create({
                             type: "donation",
                             grade: "F"
                         })
@@ -152,7 +159,7 @@ function createMockData() {
                     ];
                 case 6:
                     grade2 = _a.sent();
-                    return [4 /*yield*/, models.Grade.create({
+                    return [4 /*yield*/, models_1.default.Grade.create({
                             type: "voting",
                             grade: "F"
                         })
@@ -165,7 +172,7 @@ function createMockData() {
                 case 8:
                     // await update.set("legislatorId", user.get(""))
                     _a.sent();
-                    return [4 /*yield*/, grade1.set("userId", user1.get('id'))];
+                    return [4 /*yield*/, grade1.set("setterId", user1.get('id'))];
                 case 9:
                     _a.sent();
                     return [4 /*yield*/, grade1.save()];
@@ -174,7 +181,7 @@ function createMockData() {
                     return [4 /*yield*/, grade2.set("legislatorId", leg.get('id'))];
                 case 11:
                     _a.sent();
-                    return [4 /*yield*/, grade2.set("userId", user2.get('id'))];
+                    return [4 /*yield*/, grade2.set("setterId", user2.get('id'))];
                 case 12:
                     _a.sent();
                     return [4 /*yield*/, grade2.save()];
@@ -183,7 +190,7 @@ function createMockData() {
                     return [4 /*yield*/, grade3.set("legislatorId", leg.get('id'))];
                 case 14:
                     _a.sent();
-                    return [4 /*yield*/, grade3.set("userId", user1.get('id'))];
+                    return [4 /*yield*/, grade3.set("setterId", user1.get('id'))];
                 case 15:
                     _a.sent();
                     return [4 /*yield*/, grade3.save()];
