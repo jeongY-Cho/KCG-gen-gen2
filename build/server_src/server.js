@@ -48,6 +48,7 @@ var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var app_1 = __importDefault(require("./app"));
 var models_1 = __importStar(require("./models"));
+require("dotenv/config");
 // reinstantiate database (ignored in prod, and testing)
 var force = true;
 switch (process.env.NODE_ENV) {
