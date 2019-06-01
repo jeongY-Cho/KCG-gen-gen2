@@ -149,5 +149,5 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-decorators": "^7.4.4"
-  },
+  }
 }
