@@ -14,7 +14,6 @@ export default (sequelize, DataTypes) => {
   })
 
   Update.associate = models => {
-    Update.belongsTo(models.User)
     Update.belongsTo(models.Legislator)
   }
   return Update

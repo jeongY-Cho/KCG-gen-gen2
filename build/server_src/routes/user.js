@@ -42,7 +42,7 @@ var router = express_1.Router();
 router.get("/me", function (req, res) {
     console.log(req);
     // @ts-ignore
-    return res.json(req.user);
+    return res.json(req.session.user);
 });
 router.put("/me", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var user, _i, _a, _b, key, value, updatedUser, err_1;
@@ -53,7 +53,7 @@ router.put("/me", function (req, res) { return __awaiter(_this, void 0, void 0, 
                 return [4 /*yield*/, models_1.sequelize.models.user.findOne({
                         where: {
                             // @ts-ignore
-                            username: req.user.username
+                            username: req.session.user.username
                         }
                     })];
             case 1:
@@ -79,7 +79,7 @@ router.put("/me", function (req, res) { return __awaiter(_this, void 0, void 0, 
                 return [2 /*return*/, res.send(updatedUser)];
             case 8:
                 err_1 = _c.sent();
-                return [2 /*return*/, res.send(err_1)];
+                return [2 /*return*/, res.status(400).send(err_1)];
             case 9: return [2 /*return*/];
         }
     });
@@ -94,7 +94,7 @@ router.post("/new", function (req, res) { return __awaiter(_this, void 0, void 0
                 if (!middleName) {
                     middleName = '';
                 }
-                fullName = "" + (firstName ? firstName + " " : '') + (middleName ? middleName.substring(0, 1) + " " : '') + lastName;
+                fullName = "" + (firstName ? firstName + " " : '') + (middleName ? middleName.substring(0, 1) + ". " : '') + lastName;
                 _b.label = 1;
             case 1:
                 _b.trys.push([1, 3, , 4]);
@@ -106,7 +106,8 @@ router.post("/new", function (req, res) { return __awaiter(_this, void 0, void 0
                 return [2 /*return*/, res.send(newUser)];
             case 3:
                 err_2 = _b.sent();
-                return [2 /*return*/, res.send(err_2)];
+                console.log(err_2);
+                return [2 /*return*/, res.status(400).send(err_2)];
             case 4: return [2 /*return*/];
         }
     });
@@ -130,20 +131,35 @@ router.get("/:username", function (req, res) { return __awaiter(_this, void 0, v
     });
 }); });
 router.put("/:username", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-    var _a, _b;
+    var user, _i, _a, _b, key, value;
     return __generator(this, function (_c) {
         switch (_c.label) {
-            case 0:
-                _b = (_a = res).send;
-                return [4 /*yield*/, models_1.sequelize.models.user.findOne({
-                        where: {
-                            username: req.params.username
-                        },
-                        include: [models_1.sequelize.models.update]
-                    })];
-            case 1: 
-            // @ts-ignore
-            return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+            case 0: return [4 /*yield*/, models_1.sequelize.models.user.findOne({
+                    where: {
+                        username: req.params.username
+                    }
+                })];
+            case 1:
+                user = _c.sent();
+                if (req.session.user.get("authLevel") > user.get("authLevel")) {
+                    return [2 /*return*/, res.status(403).send({ reason: "User authentication level lower than target" })];
+                }
+                _i = 0, _a = Object.entries(req.body);
+                _c.label = 2;
+            case 2:
+                if (!(_i < _a.length)) return [3 /*break*/, 5];
+                _b = _a[_i], key = _b[0], value = _b[1];
+                return [4 /*yield*/, user.set(key, value)];
+            case 3:
+                _c.sent();
+                _c.label = 4;
+            case 4:
+                _i++;
+                return [3 /*break*/, 2];
+            case 5: return [4 /*yield*/, user.save()];
+            case 6:
+                _c.sent();
+                return [2 /*return*/, res.send(user)];
         }
     });
 }); });

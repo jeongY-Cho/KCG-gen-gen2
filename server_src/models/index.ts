@@ -4,6 +4,9 @@ import "dotenv/config"
 const host = (process.env.PGHOST as string)
 const URI = (process.env.DATABASE_URL as string)
 
+console.log(process.env.NODE_ENV);
+
+
 export const sequelize = new Sequelize(URI, {
   host: host,
   dialect: "postgres",

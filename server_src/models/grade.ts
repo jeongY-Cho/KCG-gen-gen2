@@ -12,6 +12,7 @@ export default (sequelize, DataTypes) => {
 
   Grade.associate = models => {
     Grade.belongsTo(models.Legislator, { as: "legislator" })
+    Grade.belongsTo(models.User, { as: "setter" })
   }
   return Grade
 }
