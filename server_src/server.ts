@@ -1,5 +1,7 @@
 import app from "./app"
 import models, { sequelize } from "./models"
+import "dotenv/config"
+
 
 // reinstantiate database (ignored in prod, and testing)
 let force = true
