@@ -123,6 +123,7 @@ function createMockData() {
                             district: 4,
                             session: 72,
                             party: "REPUBLICAN",
+                            updatedById: 1,
                             imgLink: "http://leg.colorado.gov/sites/default/files/styles/width_300/public/2019a_arndt%2C%20jeni.jpg?itok=x-tF-KT0",
                             grades: [
                                 {

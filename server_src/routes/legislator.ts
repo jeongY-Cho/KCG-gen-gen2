@@ -10,7 +10,7 @@ router.get("/search", async (req, res) => {
   // @ts-ignore
   return res.send(await models.Legislator.findAll({
     where: req.query,
-    include: [models.Grade]
+    include: [{ model: models.Grade, order: [[models.Grade, 'type']] }]
   }))
 })
 
@@ -20,9 +20,13 @@ router.get("/", async (req, res) => {
     where: req.query,
     include: [{
       model: models.Grade,
+      order: [[models.Grade, 'type']],
       include: [{
         model: models.User, as: "setter"
-      }]
+      },
+      ]
+    }, {
+      model: models.User, as: "updatedBy"
     }]
   }))
 })
@@ -33,9 +37,10 @@ router.get("/:id", async (req, res) => {
     where: req.params.id,
     include: [{
       model: models.Grade,
+      order: [[models.Grade, 'type']],
       include: [{
         model: models.User, as: "setter"
-      }]
+      }, { model: models.User, as: "updatedBy" }]
     }]
   }))
 })
@@ -67,6 +72,7 @@ router.post("/new", async (req, res) => {
     include: [
       {
         model: models.Grade,
+        order: [[models.Grade, "type"]],
         include: [{ model: models.User, as: "setter" }]
       },
       {
@@ -87,6 +93,7 @@ router.put("/:id", async (req, res) => {
     },
     include: [{
       model: models.Grade,
+      order: [[models.Grade, 'type']],
       include: [{ model: models.User, as: "setter" }]
     },
     {
@@ -145,7 +152,7 @@ router.put("/:id", async (req, res) => {
     await leg.set(key, value)
   }
   // set who updated
-  await leg.set("setterId", req.session.user.id)
+  await leg.set("updatedById", req.session.user.id)
   // save leg
   await leg.save()
 
@@ -155,6 +162,7 @@ router.put("/:id", async (req, res) => {
     include: [
       {
         model: models.Grade,
+        order: [[models.Grade, 'type']],
         include: [{ model: models.User, as: "setter" }]
       },
       {

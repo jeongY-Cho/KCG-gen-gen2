@@ -4,9 +4,9 @@
   "description": "",
   "main": "build/server_src/server.js",
   "scripts": {
-    "test": "set NODE_ENV='TESTING' && jest",
-    "dev": "set NODE_ENV='DEVELOPMENT' && nodemon",
-    "start": "set NODE_ENV='PRODUCTION' && node build/server_src/app.js"
+    "test": "set NODE_ENV=TESTING&& jest",
+    "dev": "set NODE_ENV=DEVELOPMENT&& nodemon",
+    "start": "set NODE_ENV=PRODUCTION&& node build/server_src/app.js"
   },
   "author": "Jeong Yeon Cho",
   "license": "MIT",

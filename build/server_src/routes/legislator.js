@@ -60,7 +60,7 @@ router.get("/search", function (req, res) { return __awaiter(_this, void 0, void
                 _b = (_a = res).send;
                 return [4 /*yield*/, models_1.default.Legislator.findAll({
                         where: req.query,
-                        include: [models_1.default.Grade]
+                        include: [{ model: models_1.default.Grade, order: [[models_1.default.Grade, 'type']] }]
                     })];
             case 1: 
             // @ts-ignore
@@ -78,9 +78,13 @@ router.get("/", function (req, res) { return __awaiter(_this, void 0, void 0, fu
                         where: req.query,
                         include: [{
                                 model: models_1.default.Grade,
+                                order: [[models_1.default.Grade, 'type']],
                                 include: [{
                                         model: models_1.default.User, as: "setter"
-                                    }]
+                                    },
+                                ]
+                            }, {
+                                model: models_1.default.User, as: "updatedBy"
                             }]
                     })];
             case 1: 
@@ -99,9 +103,10 @@ router.get("/:id", function (req, res) { return __awaiter(_this, void 0, void 0,
                         where: req.params.id,
                         include: [{
                                 model: models_1.default.Grade,
+                                order: [[models_1.default.Grade, 'type']],
                                 include: [{
                                         model: models_1.default.User, as: "setter"
-                                    }]
+                                    }, { model: models_1.default.User, as: "updatedBy" }]
                             }]
                     })];
             case 1: 
@@ -149,6 +154,7 @@ router.post("/new", function (req, res) { return __awaiter(_this, void 0, void 0
                         include: [
                             {
                                 model: models_1.default.Grade,
+                                order: [[models_1.default.Grade, "type"]],
                                 include: [{ model: models_1.default.User, as: "setter" }]
                             },
                             {
@@ -175,6 +181,7 @@ router.put("/:id", function (req, res) { return __awaiter(_this, void 0, void 0,
                         },
                         include: [{
                                 model: models_1.default.Grade,
+                                order: [[models_1.default.Grade, 'type']],
                                 include: [{ model: models_1.default.User, as: "setter" }]
                             },
                             {
@@ -274,7 +281,7 @@ router.put("/:id", function (req, res) { return __awaiter(_this, void 0, void 0,
                 return [3 /*break*/, 14];
             case 17: 
             // set who updated
-            return [4 /*yield*/, leg.set("setterId", req.session.user.id)
+            return [4 /*yield*/, leg.set("updatedById", req.session.user.id)
                 // save leg
             ];
             case 18:
@@ -293,6 +300,7 @@ router.put("/:id", function (req, res) { return __awaiter(_this, void 0, void 0,
                         include: [
                             {
                                 model: models_1.default.Grade,
+                                order: [[models_1.default.Grade, 'type']],
                                 include: [{ model: models_1.default.User, as: "setter" }]
                             },
                             {

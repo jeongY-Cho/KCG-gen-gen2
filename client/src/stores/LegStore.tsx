@@ -33,8 +33,9 @@ export interface ILeg {
   phoneNum: string,
   notes: string,
   createdAt: string,
-  updatedAt: string
+  updatedAt: string,
   grades: IGrade[],
+  updatedBy: IUser
 
 }
 
@@ -50,6 +51,7 @@ export default class LegStore {
         id: id
       }
     })
+    console.log(response.data);
 
     this.current = response.data
   }
@@ -70,7 +72,10 @@ export default class LegStore {
     console.log(response.data);
 
     this.current = response.data
+  }
 
+  @action.bound async newLeg(data: ILeg) {
+    let response = await Axios.post("/api/leg/new", data)
   }
 }
 

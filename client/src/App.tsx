@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Route, Switch, RouteComponentProps, NavLink, L
 import { Provider } from "mobx-react"
 import { inject, observer } from "mobx-react"
 import Axios from 'axios';
-import { ILeg } from './stores/LegStore';
+import { ILeg, IGrade } from './stores/LegStore';
 
 const App: React.FC = () => {
   return (
@@ -19,7 +19,7 @@ const App: React.FC = () => {
           <Route path="/new/confirmation" component={NewUserConfirmation} />
           <Route exact path="/leg" component={Leg} />
           <Route path="/leg/update" component={updateLeg} />
-          <Route path="/leg/new" component={newLeg} />
+          <Route path="/leg/new" component={NewLeg} />
           <Route path='/leg/search' component={searchLeg} />
 
           <Route component={FourOhFour} />
@@ -27,7 +27,6 @@ const App: React.FC = () => {
       </Router>
     </Provider>
   )
-
 }
 
 const Navbar: React.FC<RouteComponentProps> = (props) => {
@@ -241,22 +240,24 @@ class Leg extends Component<ILegProps, ILegState> {
 
   }
   render() {
-    var firstName, lastName, session, district, email, legPage, phoneNum, notes, grades, party;
-    var title = ''
-    var createdAt = ''
-    var updatedAt = ''
-    if (this.props.LegStore.current.id) {
-      ({ firstName, lastName, title, session, district, email, legPage, phoneNum, notes, createdAt, updatedAt, grades, party } = this.props.LegStore.current)
-      console.log(typeof createdAt);
-
-      grades = grades.map((grade) => {
-        return (
-          <li key={grade.type}>
-            {grade.type}: {grade.grade}
-          </li>
-        )
-      })
+    if (!this.props.LegStore.current.id) {
+      return (
+        <>
+          <input type="text" value={this.state.id} onChange={this.onChange} id="id" placeholder="ID" />
+          <button onClick={this.getLeg}>get leg</button>
+        </>
+      )
     }
+    let { firstName, lastName, title, session, district, email, legPage, phoneNum, notes, createdAt, updatedAt, imgLink, grades, party, updatedBy } = this.props.LegStore.current
+
+    let mappedGrades = grades.map((grade) => {
+      return (
+        <li key={grade.type}>
+          {grade.type}: {grade.grade}
+        </li>
+      )
+    })
+
 
 
     return (
@@ -265,20 +266,22 @@ class Leg extends Component<ILegProps, ILegState> {
         <button onClick={this.getLeg}>get leg</button>
         <div>first name: {firstName}</div>
         <div>last name: {lastName}</div>
-        <div>party: {party}</div>
+        <div>party: {party ? party.toLowerCase() : ''}</div>
         <div>session: {session}</div>
         <div>title: {title.toLowerCase()}</div>
         <div>district: {district}</div>
-        <div>email: {email}</div>
+        <div>email: <a href={email}>{email}</a></div>
+        <div>portrait link: <a href={imgLink} target="_blank">{imgLink}</a></div>
         <div>legislator webapage: {legPage}</div>
         <div>phone number: {phoneNum}</div>
         <div>grades:
           <ul>
-            {grades}
+            {mappedGrades}
 
           </ul>
         </div>
         <div>notes: {notes}</div>
+        <div>updatedBy: {updatedBy.fullName || ''}</div>
         {this.props.LegStore.current.id &&
           <>
             <div>created: {new Date(createdAt).toLocaleDateString()}</div>
@@ -323,6 +326,7 @@ class updateLeg extends Component<IUpdateLegProps, IUpdateLegState> {
       createdAt: this.props.LegStore.current.createdAt || '',
       updatedAt: this.props.LegStore.current.updatedAt || '',
       grades: this.props.LegStore.current.grades || '',
+      updatedBy: this.props.LegStore.current.updatedBy || {},
     }
   }
 
@@ -357,12 +361,13 @@ class updateLeg extends Component<IUpdateLegProps, IUpdateLegState> {
     })
   }
   render() {
-    var firstName, lastName, session, district, email, legPage, phoneNum, notes, grades, party;
+
+    var firstName, lastName, session, district, email, legPage, phoneNum, notes, grades, party, imgLink;
     var title = ''
     var createdAt = ''
     var updatedAt = ''
     if (this.props.LegStore.current.id) {
-      ({ firstName, lastName, title, session, district, email, legPage, phoneNum, notes, createdAt, updatedAt, grades, party } = this.state)
+      ({ firstName, lastName, title, session, district, email, legPage, phoneNum, notes, createdAt, updatedAt, grades, party, imgLink } = this.state)
       console.log(typeof createdAt);
 
       grades = grades.map((grade, i) => {
@@ -384,6 +389,7 @@ class updateLeg extends Component<IUpdateLegProps, IUpdateLegState> {
         <div>title: <input type="text" onChange={this.onChange} id="title" value={title.toLowerCase()} /></div>
         <div>district: <input type="text" onChange={this.onChange} id="district" value={district} /></div>
         <div>email: <input type="text" onChange={this.onChange} id="email" value={email} /></div>
+        <div>portrait link: <input type="text" onChange={this.onChange} id="email" value={imgLink} /></div>
         <div>legislator webapage: <input type="text" onChange={this.onChange} id="legPage" value={legPage} /></div>
         <div>phone number: <input type="text" onChange={this.onChange} id="phoneNum" value={phoneNum} /></div>
         <div>grades:
@@ -409,47 +415,70 @@ class updateLeg extends Component<IUpdateLegProps, IUpdateLegState> {
 interface INewLegProps extends RouteComponentProps {
   LegStore: LegStore,
 }
-interface INewLegState extends ILeg {
+interface INewLegState {
+  fullName: string,
+  firstName: string,
+  middleName: string,
+  party: string,
+  imgLink: string,
+  lastName: string,
+  title: string,
+  session: number,
+  district: number,
+  email: string,
+  legPage: string,
+  phoneNum: string,
+  notes: string,
+  createdAt: string,
+  updatedAt: string,
+  grades: IGrade[],
 
 }
 
 @inject("LegStore") @observer
-class newLeg extends Component<INewLegProps, INewLegState> {
+class NewLeg extends Component<INewLegProps, INewLegState> {
   constructor(props: INewLegProps) {
     super(props)
 
 
     this.state = {
-      id: 0,
-      fullName: this.props.LegStore.current.fullName,
-      firstName: this.props.LegStore.current.firstName,
-      middleName: this.props.LegStore.current.middleName,
-      party: this.props.LegStore.current.party,
-      imgLink: this.props.LegStore.current.imgLink,
-      lastName: this.props.LegStore.current.lastName,
-      title: this.props.LegStore.current.title,
-      session: this.props.LegStore.current.session,
-      district: this.props.LegStore.current.district,
-      email: this.props.LegStore.current.email,
-      legPage: this.props.LegStore.current.legPage,
-      phoneNum: this.props.LegStore.current.phoneNum,
-      notes: this.props.LegStore.current.notes,
-      createdAt: this.props.LegStore.current.createdAt,
-      updatedAt: this.props.LegStore.current.updatedAt,
-      grades: this.props.LegStore.current.grades,
+      fullName: '',
+      firstName: '',
+      middleName: '',
+      party: '',
+      imgLink: '',
+      lastName: '',
+      title: '',
+      session: 0,
+      district: 0,
+      email: '',
+      legPage: '',
+      phoneNum: '',
+      notes: '',
+      createdAt: '',
+      updatedAt: '',
+      grades: [
+        {
+          type: "voting",
+          grade: ''
+        },
+
+      ],
     }
   }
 
-  update = async () => {
-    await this.props.LegStore.updateLeg(this.state)
+  new = async () => {
+    await this.props.LegStore.newLeg(this.state as ILeg)
     this.props.history.push("/leg")
   }
 
   onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
+
     if (e.target.id === "title") {
+      console.log(e.target.id, e.target.value);
       this.setState({
-        title: e.target.value.toUpperCase()
+        title: e.target.value.toLowerCase()
       })
     }
     // @ts-ignore
@@ -471,22 +500,17 @@ class newLeg extends Component<INewLegProps, INewLegState> {
     })
   }
   render() {
-    var firstName, lastName, session, district, email, legPage, phoneNum, notes, grades, party;
-    var title = ''
-    var createdAt = ''
-    var updatedAt = ''
-    if (this.props.LegStore.current.id) {
-      ({ firstName, lastName, title, session, district, email, legPage, phoneNum, notes, createdAt, updatedAt, grades, party } = this.state)
-      console.log(typeof createdAt);
 
-      grades = grades.map((grade, i) => {
-        return (
-          <li key={grade.type}>
-            {grade.type}: <input type="text" id={grade.type} data-i={i} value={grade.grade} onChange={this.onGradeChange} />
-          </li>
-        )
-      })
-    }
+    let { firstName, lastName, title, session, district, email, legPage, phoneNum, notes, createdAt, updatedAt, grades, party, imgLink } = this.state
+
+
+    // grades = grades.map((grade, i) => {
+    //   return (
+    //     <li key={grade.type}>
+    //       {grade.type}: <input type="text" id={grade.type} data-i={i} value={grade.grade} onChange={this.onGradeChange} />
+    //     </li>
+    //   )
+    // })
 
 
     return (
@@ -495,25 +519,21 @@ class newLeg extends Component<INewLegProps, INewLegState> {
         <div>last name: <input type="text" onChange={this.onChange} id="lastName" value={lastName} /></div>
         <div>party: <input type="text" onChange={this.onChange} id="party" value={party} /></div>
         <div>session: <input type="text" onChange={this.onChange} id="session" value={session} /></div>
-        <div>title: <input type="text" onChange={this.onChange} id="title" value={title.toLowerCase()} /></div>
+        <div>title: <input type="text" onChange={this.onChange} id="title" value={title.toUpperCase()} /></div>
         <div>district: <input type="text" onChange={this.onChange} id="district" value={district} /></div>
         <div>email: <input type="text" onChange={this.onChange} id="email" value={email} /></div>
+        <div>portrait Link: <input type="text" onChange={this.onChange} id="imgLink" value={imgLink} /></div>
         <div>legislator webapage: <input type="text" onChange={this.onChange} id="legPage" value={legPage} /></div>
         <div>phone number: <input type="text" onChange={this.onChange} id="phoneNum" value={phoneNum} /></div>
         <div>grades:
           <ul>
-            {grades}
-
+            <li>voting: <input type="text" data-i={0} onChange={this.onGradeChange} value={grades[0].grade} /></li>
+            <li>rhetoric: <input type="text" data-i={1} onChange={this.onGradeChange} value={grades[1].grade} /></li>
+            <li>donations: <input type="text" data-i={2} onChange={this.onGradeChange} value={grades[2].grade} /></li>
           </ul>
         </div>
         <div>notes: <input type="text" onChange={this.onChange} id="notes" value={notes} /></div>
-        {this.props.LegStore.current.id &&
-          <>
-            <div>created: {new Date(createdAt).toLocaleDateString()}</div>
-            <div>updatedAt: {new Date(updatedAt).toLocaleDateString()}</div>
-            <button onClick={this.update}>update</button>
-          </>
-        }
+        <button onClick={this.new}>New</button>
       </>
     )
   }
