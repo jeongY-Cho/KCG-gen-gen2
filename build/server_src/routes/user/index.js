@@ -34,10 +34,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var models_1 = require("../../models");
+var models_1 = __importDefault(require("./../../models"));
 var router = express_1.Router();
 router.get("/me", function (req, res) {
     console.log(req);
@@ -50,7 +53,7 @@ router.put("/me", function (req, res) { return __awaiter(_this, void 0, void 0, 
         switch (_c.label) {
             case 0:
                 console.log(req.body);
-                return [4 /*yield*/, models_1.sequelize.models.user.findOne({
+                return [4 /*yield*/, models_1.default.sequelize.models.user.findOne({
                         where: {
                             // @ts-ignore
                             username: req.session.user.username
@@ -92,14 +95,20 @@ router.post("/new", function (req, res) { return __awaiter(_this, void 0, void 0
                 console.log(req.body);
                 _a = req.body, username = _a.username, email = _a.email, authLevel = _a.authLevel, firstName = _a.firstName, lastName = _a.lastName, middleName = _a.middleName;
                 if (!middleName) {
-                    middleName = '';
+                    middleName = "";
                 }
-                fullName = "" + (firstName ? firstName + " " : '') + (middleName ? middleName.substring(0, 1) + ". " : '') + lastName;
+                fullName = "" + (firstName ? firstName + " " : "") + (middleName ? middleName.substring(0, 1) + ". " : "") + lastName;
                 _b.label = 1;
             case 1:
                 _b.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, models_1.sequelize.models.user.create({
-                        username: username, fullName: fullName, email: email, authLevel: authLevel, firstName: firstName, lastName: lastName, middleName: middleName
+                return [4 /*yield*/, models_1.default.sequelize.models.user.create({
+                        username: username,
+                        fullName: fullName,
+                        email: email,
+                        authLevel: authLevel,
+                        firstName: firstName,
+                        lastName: lastName,
+                        middleName: middleName
                     })];
             case 2:
                 newUser = _b.sent();
@@ -118,11 +127,11 @@ router.get("/:username", function (req, res) { return __awaiter(_this, void 0, v
         switch (_c.label) {
             case 0:
                 _b = (_a = res).send;
-                return [4 /*yield*/, models_1.sequelize.models.user.findOne({
+                return [4 /*yield*/, models_1.default.sequelize.models.user.findOne({
                         where: {
                             username: req.params.username
                         },
-                        include: [models_1.sequelize.models.update]
+                        include: [models_1.default.sequelize.models.update]
                     })];
             case 1: 
             // @ts-ignore
@@ -134,7 +143,7 @@ router.put("/:username", function (req, res) { return __awaiter(_this, void 0, v
     var user, _i, _a, _b, key, value;
     return __generator(this, function (_c) {
         switch (_c.label) {
-            case 0: return [4 /*yield*/, models_1.sequelize.models.user.findOne({
+            case 0: return [4 /*yield*/, sequelize.models.user.findOne({
                     where: {
                         username: req.params.username
                     }
@@ -142,7 +151,9 @@ router.put("/:username", function (req, res) { return __awaiter(_this, void 0, v
             case 1:
                 user = _c.sent();
                 if (req.session.user.get("authLevel") > user.get("authLevel")) {
-                    return [2 /*return*/, res.status(403).send({ reason: "User authentication level lower than target" })];
+                    return [2 /*return*/, res
+                            .status(403)
+                            .send({ reason: "User authentication level lower than target" })];
                 }
                 _i = 0, _a = Object.entries(req.body);
                 _c.label = 2;

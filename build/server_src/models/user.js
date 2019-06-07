@@ -1,7 +1,6 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = (function (sequelize, DataTypes) {
-    var User = sequelize.define("user", {
+module.exports = function (sequelize, DataTypes) {
+    var user = sequelize.define("User", {
         username: {
             type: DataTypes.STRING,
             unique: true,
@@ -9,6 +8,9 @@ exports.default = (function (sequelize, DataTypes) {
             validate: {
                 not: [" ", "i"]
             }
+        },
+        uid: {
+            type: DataTypes.STRING
         },
         fullName: {
             type: DataTypes.STRING,
@@ -37,10 +39,11 @@ exports.default = (function (sequelize, DataTypes) {
         middleName: {
             type: DataTypes.STRING
         }
-    });
-    User.associate = function (models) {
-        User.hasMany(models.Update);
-        User.hasMany(models.Grade, { as: "setter" });
+    }, {});
+    user.associate = function (models) {
+        // associations can be defined here
+        user.hasMany(models.Update);
+        user.hasMany(models.Grade, { as: "setter" });
     };
-    return User;
-});
+    return user;
+};

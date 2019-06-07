@@ -1,7 +1,6 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = (function (sequelize, DataTypes) {
-    var Legislator = sequelize.define("legislator", {
+module.exports = function (sequelize, DataTypes) {
+    var legislator = sequelize.define("Legislator", {
         fullName: {
             type: DataTypes.STRING,
             allowNull: false
@@ -16,7 +15,7 @@ exports.default = (function (sequelize, DataTypes) {
         },
         middleName: {
             type: DataTypes.STRING,
-            defaultValue: ''
+            defaultValue: ""
         },
         title: {
             type: DataTypes.ENUM("SENATOR", "REPRESENTATIVE"),
@@ -56,11 +55,15 @@ exports.default = (function (sequelize, DataTypes) {
             type: DataTypes.STRING
         },
         notes: DataTypes.TEXT
-    });
-    Legislator.associate = function (models) {
-        Legislator.hasMany(models.Grade);
-        Legislator.belongsTo(models.User, { as: "updatedBy", constraint: false });
-        Legislator.hasMany(models.Update, { constraint: false });
+    }, {});
+    legislator.associate = function (models) {
+        // associations can be defined here
+        legislator.hasMany(models.Grade);
+        legislator.hasMany(models.Update, { constraint: false });
+        legislator.belongsTo(models.User, {
+            as: "updatedBy",
+            constraint: false
+        });
     };
-    return Legislator;
-});
+    return legislator;
+};

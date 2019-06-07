@@ -37,6 +37,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
@@ -45,8 +52,16 @@ var models_1 = __importDefault(require("./models"));
 var routes_1 = __importDefault(require("./routes"));
 var path_1 = __importDefault(require("path"));
 var express_session_1 = __importDefault(require("express-session"));
+var admin = __importStar(require("firebase-admin"));
+admin.initializeApp({
+    credential: admin.credential.cert({
+        projectId: "kcg-legislator-report-card",
+        privateKey: process.env.FIREBASE_PRIVATE_KEY,
+        clientEmail: "firebase-adminsdk-hnddn@kcg-legislator-report-card.iam.gserviceaccount.com"
+    }),
+    databaseURL: "https://kcg-legislator-report-card.firebaseio.com"
+});
 var app = express_1.default();
-console.log(path_1.default.join(__dirname, "../client"));
 // serve static files
 app.use(express_1.default.static(path_1.default.join(__dirname, "../client")));
 //middleware to get body
@@ -72,34 +87,37 @@ var authCheck = function (req, res, next) {
         next();
     }
 };
-// route for api 
+// route for api
 app.use("/api/user", authCheck, routes_1.default.user);
 app.use("/api/leg", authCheck, routes_1.default.leg);
 app.use("/generator", routes_1.default.generator);
 app.post("/login", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-    var user;
+    var decodedToken, err_1, user;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                // @ts-ignore
-                if (req.session.isLoggedIn) {
-                    return [2 /*return*/, res.status(200).send()];
-                }
-                return [4 /*yield*/, models_1.default.User.findOne({
-                        where: {
-                            username: req.body.username
-                        }
-                    })];
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, admin.auth().verifyIdToken(req.body)];
             case 1:
+                decodedToken = _a.sent();
+                return [3 /*break*/, 3];
+            case 2:
+                err_1 = _a.sent();
+                return [2 /*return*/, res.send(400).send("Invalid Token")];
+            case 3: return [4 /*yield*/, models_1.default.sequelize.models.User.findOne({
+                    where: {
+                        uid: decodedToken.uid
+                    }
+                })];
+            case 4:
                 user = _a.sent();
                 if (user) {
-                    req.session.isLoggedIn = true;
                     req.session.user = user;
-                    res.status(201);
-                    return [2 /*return*/, res.send(user)];
+                    req.session.isLoggedIn = true;
+                    return [2 /*return*/, res.status(200).send(user)];
                 }
                 else {
-                    return [2 /*return*/, res.sendStatus(400)];
+                    return [2 /*return*/, res.status(400).send("No such User")];
                 }
                 return [2 /*return*/];
         }
@@ -111,7 +129,7 @@ app.post("/logout", function (req, res) { return __awaiter(_this, void 0, void 0
             case 0: return [4 /*yield*/, req.session.destroy()];
             case 1:
                 _a.sent();
-                return [2 /*return*/, res.sendStatus(200)];
+                return [2 /*return*/, res.status(200).send("Logged out")];
         }
     });
 }); });

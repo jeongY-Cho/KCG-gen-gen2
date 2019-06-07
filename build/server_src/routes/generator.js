@@ -41,11 +41,13 @@ var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var express_rate_limit_1 = __importDefault(require("express-rate-limit"));
-var models_1 = __importDefault(require("../models"));
+var models_1 = __importDefault(require("./../models"));
 var generator_1 = __importDefault(require("../generator"));
 var router = express_1.Router();
 // @ts-ignore
-router.use(express_rate_limit_1.default({
+router.use(
+// @ts-ignore
+express_rate_limit_1.default({
     max: 100,
     headers: true,
     handler: function (req, res, next) {
@@ -61,9 +63,9 @@ router.get("/", function (req, res) { return __awaiter(_this, void 0, void 0, fu
     var leg, data, _i, _a, grade, type, score, fileName, _b, _c;
     return __generator(this, function (_d) {
         switch (_d.label) {
-            case 0: return [4 /*yield*/, models_1.default.Legislator.findOne({
+            case 0: return [4 /*yield*/, models.Legislator.findOne({
                     where: req.query,
-                    include: [models_1.default.Grade]
+                    include: [models_1.default.sequelize.models.Grade]
                 })];
             case 1:
                 leg = _d.sent();
@@ -79,20 +81,22 @@ router.get("/", function (req, res) { return __awaiter(_this, void 0, void 0, fu
                 };
                 for (_i = 0, _a = leg.get("grades"); _i < _a.length; _i++) {
                     grade = _a[_i];
-                    type = grade.get('type');
+                    type = grade.get("type");
                     score = grade.get("grade");
                     data.grades[type] = score;
                 }
                 fileName = setFileName(data.name, leg.get("session"), data.title, data.district);
                 console.log(fileName);
                 if (!leg) return [3 /*break*/, 3];
-                res.set('Content-disposition', 'inline; filename=' + fileName);
+                res.set("Content-disposition", "inline; filename=" + fileName);
                 res.set("Content-Type", "image/jpeg");
                 res.set("X-suggested-filename", fileName);
                 _c = (_b = res).send;
                 return [4 /*yield*/, generator_1.default.makeReportCard(data)];
             case 2: return [2 /*return*/, _c.apply(_b, [_d.sent()])];
-            case 3: return [2 /*return*/, res.status(400).send({ reason: "No Legislator with specified queries found" })];
+            case 3: return [2 /*return*/, res
+                    .status(400)
+                    .send({ reason: "No Legislator with specified queries found" })];
         }
     });
 }); });
@@ -106,7 +110,7 @@ router.get("/:session/:title/:district", function (req, res) { return __awaiter(
             case 1:
                 data = _d.sent();
                 fileName = setFileName(data.name, data.session, data.title, data.district);
-                res.set('Content-disposition', 'attachment; filename=' + fileName);
+                res.set("Content-disposition", "attachment; filename=" + fileName);
                 res.set("X-suggested-filename", fileName);
                 res.set("Content-Type", "image/jpeg");
                 _c = (_b = res).send;
@@ -116,18 +120,29 @@ router.get("/:session/:title/:district", function (req, res) { return __awaiter(
     });
 }); });
 function setFileName(name, session, title, district) {
-    return name.split(" ").join("_").split(".").join("_") + "_" + session + title.substring(0, 3).toLowerCase() + district + ".jpeg";
+    return (name
+        .split(" ")
+        .join("_")
+        .split(".")
+        .join("_") +
+        "_" +
+        session +
+        title.substring(0, 3).toLowerCase() +
+        district +
+        ".jpeg");
 }
 function getReportCard(session, title, district) {
     return __awaiter(this, void 0, void 0, function () {
         var leg, data, _i, _a, grade, type, score;
         return __generator(this, function (_b) {
             switch (_b.label) {
-                case 0: return [4 /*yield*/, models_1.default.Legislator.findOne({
+                case 0: return [4 /*yield*/, models.Legislator.findOne({
                         where: {
-                            session: session, title: title, district: district
+                            session: session,
+                            title: title,
+                            district: district
                         },
-                        include: [models_1.default.Grade]
+                        include: [models_1.default.sequelize.models.Grade]
                     })];
                 case 1:
                     leg = _b.sent();
@@ -144,7 +159,7 @@ function getReportCard(session, title, district) {
                     };
                     for (_i = 0, _a = leg.get("grades"); _i < _a.length; _i++) {
                         grade = _a[_i];
-                        type = grade.get('type');
+                        type = grade.get("type");
                         score = grade.get("grade");
                         data.grades[type] = score;
                     }

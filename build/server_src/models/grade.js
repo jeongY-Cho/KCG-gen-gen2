@@ -1,7 +1,6 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = (function (sequelize, DataTypes) {
-    var Grade = sequelize.define("grade", {
+module.exports = function (sequelize, DataTypes) {
+    var grade = sequelize.define("Grade", {
         type: {
             type: DataTypes.STRING,
             allowNull: false
@@ -10,10 +9,11 @@ exports.default = (function (sequelize, DataTypes) {
             type: DataTypes.STRING,
             allowNull: true
         }
-    });
-    Grade.associate = function (models) {
-        Grade.belongsTo(models.Legislator, { as: "legislator" });
-        Grade.belongsTo(models.User, { as: "setter" });
+    }, {});
+    grade.associate = function (models) {
+        // associations can be defined here
+        grade.belongsTo(models.Legislator, { as: "legislator" });
+        grade.belongsTo(models.User, { as: "setter" });
     };
-    return Grade;
-});
+    return grade;
+};

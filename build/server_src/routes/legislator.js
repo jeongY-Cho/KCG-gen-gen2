@@ -49,7 +49,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var models_1 = __importDefault(require("../models"));
+var models_1 = __importDefault(require("./../models"));
 var router = express_1.Router();
 router.get("/search", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var _a, _b;
@@ -58,9 +58,14 @@ router.get("/search", function (req, res) { return __awaiter(_this, void 0, void
             case 0:
                 console.log(req.query);
                 _b = (_a = res).send;
-                return [4 /*yield*/, models_1.default.Legislator.findAll({
+                return [4 /*yield*/, models_1.default.sequelize.models.Legislator.findAll({
                         where: req.query,
-                        include: [{ model: models_1.default.Grade, order: [[models_1.default.Grade, 'type']] }]
+                        include: [
+                            {
+                                model: models_1.default.sequelize.models.Grade,
+                                order: [[models_1.default.sequelize.models.Grade, "type"]]
+                            }
+                        ]
                     })];
             case 1: 
             // @ts-ignore
@@ -74,18 +79,24 @@ router.get("/", function (req, res) { return __awaiter(_this, void 0, void 0, fu
         switch (_c.label) {
             case 0:
                 _b = (_a = res).send;
-                return [4 /*yield*/, models_1.default.Legislator.findOne({
+                return [4 /*yield*/, models_1.default.sequelize.models.Legislator.findOne({
                         where: req.query,
-                        include: [{
-                                model: models_1.default.Grade,
-                                order: [[models_1.default.Grade, 'type']],
-                                include: [{
-                                        model: models_1.default.User, as: "setter"
-                                    },
+                        include: [
+                            {
+                                model: models_1.default.sequelize.models.Grade,
+                                order: [[models_1.default.sequelize.models.Grade, "type"]],
+                                include: [
+                                    {
+                                        model: models_1.default.sequelize.models.User,
+                                        as: "setter"
+                                    }
                                 ]
-                            }, {
-                                model: models_1.default.User, as: "updatedBy"
-                            }]
+                            },
+                            {
+                                model: models_1.default.sequelize.models.User,
+                                as: "updatedBy"
+                            }
+                        ]
                     })];
             case 1: 
             // @ts-ignore
@@ -99,15 +110,21 @@ router.get("/:id", function (req, res) { return __awaiter(_this, void 0, void 0,
         switch (_c.label) {
             case 0:
                 _b = (_a = res).send;
-                return [4 /*yield*/, models_1.default.Legislator.findOne({
+                return [4 /*yield*/, models_1.default.sequelize.models.Legislator.findOne({
                         where: req.params.id,
-                        include: [{
-                                model: models_1.default.Grade,
-                                order: [[models_1.default.Grade, 'type']],
-                                include: [{
-                                        model: models_1.default.User, as: "setter"
-                                    }, { model: models_1.default.User, as: "updatedBy" }]
-                            }]
+                        include: [
+                            {
+                                model: models_1.default.sequelize.models.Grade,
+                                order: [[models_1.default.sequelize.models.Grade, "type"]],
+                                include: [
+                                    {
+                                        model: models_1.default.sequelize.models.User,
+                                        as: "setter"
+                                    },
+                                    { model: models_1.default.sequelize.models.User, as: "updatedBy" }
+                                ]
+                            }
+                        ]
                     })];
             case 1: 
             // @ts-ignore
@@ -121,13 +138,21 @@ router.post("/new", function (req, res) { return __awaiter(_this, void 0, void 0
         switch (_d.label) {
             case 0:
                 _a = req.body, firstName = _a.firstName, middleName = _a.middleName, lastName = _a.lastName, title = _a.title, session = _a.session, party = _a.party, imgLink = _a.imgLink, email = _a.email, legPage = _a.legPage, phoneNum = _a.phoneNum, notes = _a.notes, grades = _a.grades;
-                return [4 /*yield*/, models_1.default.Legislator.create({
+                return [4 /*yield*/, models_1.default.sequelize.models.Legislator.create({
                         updatedBy: req.session.user.id,
-                        fullName: "" + (firstName ? firstName + " " : '') + (middleName ? middleName.substring(0, 1) + ". " : '') + lastName,
-                        firstName: firstName, middleName: middleName, lastName: lastName, title: title, session: session, party: party, imgLink: imgLink, email: email, legPage: legPage, phoneNum: phoneNum, notes: notes
-                    })
-                    // set grades
-                ];
+                        fullName: "" + (firstName ? firstName + " " : "") + (middleName ? middleName.substring(0, 1) + ". " : "") + lastName,
+                        firstName: firstName,
+                        middleName: middleName,
+                        lastName: lastName,
+                        title: title,
+                        session: session,
+                        party: party,
+                        imgLink: imgLink,
+                        email: email,
+                        legPage: legPage,
+                        phoneNum: phoneNum,
+                        notes: notes
+                    })];
             case 1:
                 newLeg = _d.sent();
                 _i = 0, grades_1 = grades;
@@ -135,7 +160,7 @@ router.post("/new", function (req, res) { return __awaiter(_this, void 0, void 0
             case 2:
                 if (!(_i < grades_1.length)) return [3 /*break*/, 5];
                 grade = grades_1[_i];
-                return [4 /*yield*/, models_1.default.Grade.create({
+                return [4 /*yield*/, models_1.default.sequelize.models.Grade.create({
                         type: grade.type,
                         grade: grade.grade,
                         legislatorId: newLeg.get("id"),
@@ -149,16 +174,16 @@ router.post("/new", function (req, res) { return __awaiter(_this, void 0, void 0
                 return [3 /*break*/, 2];
             case 5:
                 _c = (_b = res).send;
-                return [4 /*yield*/, models_1.default.Legislator.findOne({
+                return [4 /*yield*/, models_1.default.sequelize.models.Legislator.findOne({
                         where: { id: newLeg.get("id") },
                         include: [
                             {
-                                model: models_1.default.Grade,
-                                order: [[models_1.default.Grade, "type"]],
-                                include: [{ model: models_1.default.User, as: "setter" }]
+                                model: models_1.default.sequelize.models.Grade,
+                                order: [[models_1.default.sequelize.models.Grade, "type"]],
+                                include: [{ model: models_1.default.sequelize.models.User, as: "setter" }]
                             },
                             {
-                                model: models_1.default.User,
+                                model: models_1.default.sequelize.models.User,
                                 as: "updatedBy"
                             }
                         ]
@@ -175,17 +200,18 @@ router.put("/:id", function (req, res) { return __awaiter(_this, void 0, void 0,
         switch (_g.label) {
             case 0:
                 console.log(req.body);
-                return [4 /*yield*/, models_1.default.Legislator.findOne({
+                return [4 /*yield*/, models_1.default.sequelize.models.Legislator.findOne({
                         where: {
                             id: req.params.id
                         },
-                        include: [{
-                                model: models_1.default.Grade,
-                                order: [[models_1.default.Grade, 'type']],
-                                include: [{ model: models_1.default.User, as: "setter" }]
+                        include: [
+                            {
+                                model: models_1.default.sequelize.models.Grade,
+                                order: [[models_1.default.sequelize.models.Grade, "type"]],
+                                include: [{ model: models_1.default.sequelize.models.User, as: "setter" }]
                             },
                             {
-                                model: models_1.default.User,
+                                model: models_1.default.sequelize.models.User,
                                 as: "updatedBy"
                             }
                         ]
@@ -205,9 +231,7 @@ router.put("/:id", function (req, res) { return __awaiter(_this, void 0, void 0,
                 return [4 /*yield*/, leg.set("lastName", lastName)];
             case 4:
                 _g.sent();
-                return [4 /*yield*/, leg.set("fullName", "" + (firstName ? firstName + " " : '') + (middleName ? middleName.substring(0, 1) + ". " : '') + lastName)
-                    // set grades 
-                ];
+                return [4 /*yield*/, leg.set("fullName", "" + (firstName ? firstName + " " : "") + (middleName ? middleName.substring(0, 1) + ". " : "") + lastName)];
             case 5:
                 _g.sent();
                 _i = 0, grades_2 = grades;
@@ -216,37 +240,31 @@ router.put("/:id", function (req, res) { return __awaiter(_this, void 0, void 0,
                 if (!(_i < grades_2.length)) return [3 /*break*/, 13];
                 gradeUpdate = grades_2[_i];
                 type = gradeUpdate.type, grade = gradeUpdate.grade;
-                return [4 /*yield*/, models_1.default.Grade.findOne({
+                return [4 /*yield*/, models_1.default.sequelize.models.Grade.findOne({
                         where: {
                             type: type,
                             legislatorId: req.params.id
                         }
-                    })
-                    // if changed set grade, new update
-                ];
+                    })];
             case 7:
                 gradeModel = _g.sent();
                 if (!(grade !== gradeModel.get("grade"))) return [3 /*break*/, 12];
                 oldGrade = gradeModel.get("grade");
                 // set grade
-                return [4 /*yield*/, gradeModel.set("grade", grade)
-                    // set who updated 
-                ];
+                return [4 /*yield*/, gradeModel.set("grade", grade)];
             case 8:
                 // set grade
                 _g.sent();
-                // set who updated 
+                // set who updated
                 return [4 /*yield*/, gradeModel.set("setterId", req.session.user.id)];
             case 9:
-                // set who updated 
+                // set who updated
                 _g.sent();
-                return [4 /*yield*/, gradeModel.save()
-                    // @ts-ignore new update
-                ];
+                return [4 /*yield*/, gradeModel.save()];
             case 10:
                 _g.sent();
                 // @ts-ignore new update
-                return [4 /*yield*/, models_1.default.Update.create({
+                return [4 /*yield*/, models_1.default.sequelize.models.Update.create({
                         type: type,
                         oldGrade: oldGrade,
                         newGrade: grade,
@@ -267,7 +285,7 @@ router.put("/:id", function (req, res) { return __awaiter(_this, void 0, void 0,
                 if (!(_b < _c.length)) return [3 /*break*/, 17];
                 _d = _c[_b], key = _d[0], value = _d[1];
                 // @ts-ignore
-                if (value === '') {
+                if (value === "") {
                     // @ts-ignore
                     value = null;
                 }
@@ -281,36 +299,32 @@ router.put("/:id", function (req, res) { return __awaiter(_this, void 0, void 0,
                 return [3 /*break*/, 14];
             case 17: 
             // set who updated
-            return [4 /*yield*/, leg.set("updatedById", req.session.user.id)
-                // save leg
-            ];
+            return [4 /*yield*/, leg.set("updatedById", req.session.user.id)];
             case 18:
                 // set who updated
                 _g.sent();
                 // save leg
-                return [4 /*yield*/, leg.save()
-                    // @ts-ignore return updated leg and grades 
-                ];
+                return [4 /*yield*/, leg.save()];
             case 19:
                 // save leg
                 _g.sent();
                 _f = (_e = res).send;
-                return [4 /*yield*/, models_1.default.Legislator.findOne({
+                return [4 /*yield*/, models_1.default.sequelize.models.Legislator.findOne({
                         where: { id: req.params.id },
                         include: [
                             {
-                                model: models_1.default.Grade,
-                                order: [[models_1.default.Grade, 'type']],
-                                include: [{ model: models_1.default.User, as: "setter" }]
+                                model: models_1.default.sequelize.models.Grade,
+                                order: [[models_1.default.sequelize.models.Grade, "type"]],
+                                include: [{ model: models_1.default.sequelize.models.User, as: "setter" }]
                             },
                             {
-                                model: models_1.default.User,
+                                model: models_1.default.sequelize.models.User,
                                 as: "updatedBy"
                             }
                         ]
                     })];
             case 20: 
-            // @ts-ignore return updated leg and grades 
+            // @ts-ignore return updated leg and grades
             return [2 /*return*/, _f.apply(_e, [_g.sent()])];
         }
     });
@@ -321,7 +335,7 @@ router.delete("/:id", function (req, res) { return __awaiter(_this, void 0, void
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, models_1.default.Legislator.destroy({
+                return [4 /*yield*/, models_1.default.sequelize.models.Legislator.destroy({
                         where: {
                             id: req.params.id
                         }

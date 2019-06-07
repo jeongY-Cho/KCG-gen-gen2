@@ -37,19 +37,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var app_1 = __importDefault(require("./app"));
-var models_1 = __importStar(require("./models"));
+var models_1 = __importDefault(require("./models"));
 // reinstantiate database (ignored in prod, and testing)
-var force = true;
+var force = false;
 switch (process.env.NODE_ENV) {
     case "PRODUCTION": {
         force = false;
@@ -58,156 +51,13 @@ switch (process.env.NODE_ENV) {
         force = true;
     }
 }
+console.log(models_1.default);
 // initialize database connection
-models_1.sequelize.sync({ force: force }).then(function () { return __awaiter(_this, void 0, void 0, function () {
+models_1.default.sequelize.sync({ force: force }).then(function () { return __awaiter(_this, void 0, void 0, function () {
     return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                if (!force) return [3 /*break*/, 2];
-                return [4 /*yield*/, createMockData()];
-            case 1:
-                _a.sent();
-                _a.label = 2;
-            case 2:
-                app_1.default.listen(process.env.PORT, function () {
-                    console.log("listening on port " + process.env.PORT);
-                });
-                return [2 /*return*/];
-        }
+        app_1.default.listen(process.env.PORT, function () {
+            console.log("listening on port " + process.env.PORT);
+        });
+        return [2 /*return*/];
     });
 }); });
-function createMockData() {
-    return __awaiter(this, void 0, void 0, function () {
-        var user1, user2, update, leg, grade1, grade2, grade3;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, models_1.default.User.create({
-                        username: "test1",
-                        fullName: "first last",
-                        firstName: "first",
-                        lastName: "last",
-                        middleName: "middle",
-                        email: "123@123.com",
-                        authenticationLevel: 0,
-                    })
-                    // @ts-ignore
-                ];
-                case 1:
-                    user1 = _a.sent();
-                    return [4 /*yield*/, models_1.default.User.create({
-                            username: "test2",
-                            fullName: "Johnny Applesasdfeed",
-                            firstName: "Johnnasdy",
-                            lastName: "Applasdfeseed",
-                            email: "123@1asdf23.com",
-                            authenticationsLevel: 0,
-                        })
-                        // @ts-ignore
-                    ];
-                case 2:
-                    user2 = _a.sent();
-                    return [4 /*yield*/, models_1.default.Update.create({
-                            type: "rhetoric",
-                            oldGrade: "B",
-                            newGrade: "A"
-                        })
-                        // @ts-ignore
-                    ];
-                case 3:
-                    update = _a.sent();
-                    return [4 /*yield*/, models_1.default.Legislator.create({
-                            fullName: "Joe Shmoe",
-                            firstName: "Joe",
-                            lastName: "Shmoe",
-                            title: "SENATOR",
-                            district: 4,
-                            session: 72,
-                            party: "REPUBLICAN",
-                            updatedById: 1,
-                            imgLink: "http://leg.colorado.gov/sites/default/files/styles/width_300/public/2019a_arndt%2C%20jeni.jpg?itok=x-tF-KT0",
-                            grades: [
-                                {
-                                    type: "rhetoric",
-                                    grade: "F"
-                                },
-                                {
-                                    type: "donation",
-                                    grade: "A"
-                                },
-                                {
-                                    type: "voting",
-                                    grade: "C"
-                                }
-                            ]
-                        })
-                        // @ts-ignore
-                    ];
-                case 4:
-                    leg = _a.sent();
-                    return [4 /*yield*/, models_1.default.Grade.create({
-                            type: "rhetoric",
-                            grade: "A"
-                        })
-                        // @ts-ignore
-                    ];
-                case 5:
-                    grade1 = _a.sent();
-                    return [4 /*yield*/, models_1.default.Grade.create({
-                            type: "donation",
-                            grade: "F"
-                        })
-                        // @ts-ignore
-                    ];
-                case 6:
-                    grade2 = _a.sent();
-                    return [4 /*yield*/, models_1.default.Grade.create({
-                            type: "voting",
-                            grade: "F"
-                        })
-                        // await update.set("legislatorId", user.get(""))
-                    ];
-                case 7:
-                    grade3 = _a.sent();
-                    // await update.set("legislatorId", user.get(""))
-                    return [4 /*yield*/, grade1.set("legislatorId", leg.get('id'))];
-                case 8:
-                    // await update.set("legislatorId", user.get(""))
-                    _a.sent();
-                    return [4 /*yield*/, grade1.set("setterId", user1.get('id'))];
-                case 9:
-                    _a.sent();
-                    return [4 /*yield*/, grade1.save()];
-                case 10:
-                    _a.sent();
-                    return [4 /*yield*/, grade2.set("legislatorId", leg.get('id'))];
-                case 11:
-                    _a.sent();
-                    return [4 /*yield*/, grade2.set("setterId", user2.get('id'))];
-                case 12:
-                    _a.sent();
-                    return [4 /*yield*/, grade2.save()];
-                case 13:
-                    _a.sent();
-                    return [4 /*yield*/, grade3.set("legislatorId", leg.get('id'))];
-                case 14:
-                    _a.sent();
-                    return [4 /*yield*/, grade3.set("setterId", user1.get('id'))];
-                case 15:
-                    _a.sent();
-                    return [4 /*yield*/, grade3.save()];
-                case 16:
-                    _a.sent();
-                    return [4 /*yield*/, update.set("userId", user1.get("id"))];
-                case 17:
-                    _a.sent();
-                    return [4 /*yield*/, update.set("legislatorId", leg.get("id"))];
-                case 18:
-                    _a.sent();
-                    return [4 /*yield*/, update.save()];
-                case 19:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
-        });
-    });
-}

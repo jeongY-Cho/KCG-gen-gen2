@@ -1,45 +1,34 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var sequelize_1 = require("sequelize");
-require("dotenv/config");
-console.log(JSON.stringify(process.env.NODE_ENV));
-if (process.env.NODE_ENV == "DEVELOPMENT") {
-    console.log("asdfeffe");
-    var database = process.env.DEV_PGDATABASE;
-    var username = process.env.DEV_PGUSERNAME;
-    var password = process.env.DEV_PGPASSWORD;
-    exports.sequelize = new sequelize_1.Sequelize(database, username, password, {
-        host: 'localhost',
-        dialect: 'postgres',
-        logging: false
-    });
+require("dotenv").config();
+var fs = require("fs");
+var path = require("path");
+var Sequelize = require("sequelize");
+var basename = path.basename(__filename);
+var env = process.env.NODE_ENV || "development";
+var config = require(__dirname + "/../config/config.json")[env];
+var db = {};
+var sequelize;
+if (config.use_env_variable) {
+    sequelize = new Sequelize(process.env[config.use_env_variable], config);
 }
-else if (process.env.NODE_ENV === "PRODUCTION") {
-    var host = process.env.PGHOST;
-    var URI = process.env.DATABASE_URL;
-    exports.sequelize = new sequelize_1.Sequelize(URI, {
-        host: host,
-        dialect: "postgres",
-        logging: false,
-        dialectOptions: {
-            ssl: true
-        }
-    });
+else {
+    sequelize = new Sequelize(config.database, config.username, config.password, config);
 }
-console.log(exports.sequelize);
-exports.sequelize.authenticate()
-    .catch(function (err) {
-    console.error(err);
+fs.readdirSync(__dirname)
+    .filter(function (file) {
+    return (file.indexOf(".") !== 0 && file !== basename && file.slice(-3) === ".js");
+})
+    .forEach(function (file) {
+    var model = sequelize["import"](path.join(__dirname, file));
+    db[model.name] = model;
 });
-var models = {
-    User: exports.sequelize.import("./user"),
-    Legislator: exports.sequelize.import("./legislator"),
-    Update: exports.sequelize.import("./update"),
-    Grade: exports.sequelize.import("./grade")
-};
-Object.keys(models).forEach(function (key) {
-    if ("associate" in models[key]) {
-        models[key].associate(models);
+Object.keys(db).forEach(function (modelName) {
+    if (db[modelName].associate) {
+        db[modelName].associate(db);
     }
 });
-exports.default = models;
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+console.log(db);
+exports.default = db;
