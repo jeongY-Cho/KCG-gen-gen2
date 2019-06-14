@@ -41,11 +41,14 @@ var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var express_rate_limit_1 = __importDefault(require("express-rate-limit"));
-var models_1 = __importDefault(require("../models"));
+var path_1 = require("path");
+var db = require(path_1.join(process.cwd(), "/models"));
 var generator_1 = __importDefault(require("../generator"));
 var router = express_1.Router();
 // @ts-ignore
-router.use(express_rate_limit_1.default({
+router.use(
+// @ts-ignore
+express_rate_limit_1.default({
     max: 100,
     headers: true,
     handler: function (req, res, next) {
@@ -57,98 +60,166 @@ router.use(express_rate_limit_1.default({
         }
     }
 }));
+// generate with query
 router.get("/", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-    var leg, data, _i, _a, grade, type, score, fileName, _b, _c;
-    return __generator(this, function (_d) {
-        switch (_d.label) {
-            case 0: return [4 /*yield*/, models_1.default.Legislator.findOne({
-                    where: req.query,
-                    include: [models_1.default.Grade]
-                })];
+    var _a, session, title, district, id, _b, reportCard, fileName, err_1;
+    return __generator(this, function (_c) {
+        switch (_c.label) {
+            case 0:
+                _a = req.query, session = _a.session, title = _a.title, district = _a.district, id = _a.id;
+                _c.label = 1;
             case 1:
-                leg = _d.sent();
-                console.log(leg);
-                data = {
-                    imgLink: leg.get("imgLink"),
-                    title: leg.get("title"),
-                    updatedAt: leg.get("updatedAt"),
-                    name: leg.get("fullName"),
-                    district: leg.get("district"),
-                    // @ts-ignore
-                    grades: {}
-                };
-                for (_i = 0, _a = leg.get("grades"); _i < _a.length; _i++) {
-                    grade = _a[_i];
-                    type = grade.get('type');
-                    score = grade.get("grade");
-                    data.grades[type] = score;
-                }
-                fileName = setFileName(data.name, leg.get("session"), data.title, data.district);
-                console.log(fileName);
-                if (!leg) return [3 /*break*/, 3];
-                res.set('Content-disposition', 'inline; filename=' + fileName);
+                _c.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, getReportCard(session, title, district, id)];
+            case 2:
+                _b = _c.sent(), reportCard = _b.reportCard, fileName = _b.fileName;
+                return [3 /*break*/, 4];
+            case 3:
+                err_1 = _c.sent();
+                return [2 /*return*/, res.status(400).send({
+                        error: err_1,
+                        reason: "No Legislator with specified queries found. Queries: " + JSON.stringify(req.query)
+                    })];
+            case 4:
+                res.set("Content-disposition", "inline; filename=" + fileName);
                 res.set("Content-Type", "image/jpeg");
                 res.set("X-suggested-filename", fileName);
-                _c = (_b = res).send;
-                return [4 /*yield*/, generator_1.default.makeReportCard(data)];
-            case 2: return [2 /*return*/, _c.apply(_b, [_d.sent()])];
-            case 3: return [2 /*return*/, res.status(400).send({ reason: "No Legislator with specified queries found" })];
+                return [2 /*return*/, res.send(reportCard)];
         }
     });
 }); });
+// generate with params in url
 router.get("/:session/:title/:district", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-    var _a, session, title, district, data, fileName, _b, _c;
-    return __generator(this, function (_d) {
-        switch (_d.label) {
+    var _a, session, title, district, _b, reportCard, fileName, err_2;
+    return __generator(this, function (_c) {
+        switch (_c.label) {
             case 0:
                 _a = req.params, session = _a.session, title = _a.title, district = _a.district;
-                return [4 /*yield*/, getReportCard(session, title, district)];
+                _c.label = 1;
             case 1:
-                data = _d.sent();
-                fileName = setFileName(data.name, data.session, data.title, data.district);
-                res.set('Content-disposition', 'attachment; filename=' + fileName);
+                _c.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, getReportCard(session, title, district)];
+            case 2:
+                _b = _c.sent(), reportCard = _b.reportCard, fileName = _b.fileName;
+                return [3 /*break*/, 4];
+            case 3:
+                err_2 = _c.sent();
+                return [2 /*return*/, res.status(400).send({
+                        error: err_2,
+                        reason: "No Legislator with specified queries found. Queries: " + JSON.stringify(req.params)
+                    })];
+            case 4:
+                res.set("Content-disposition", "attachment; filename=" + fileName);
                 res.set("X-suggested-filename", fileName);
                 res.set("Content-Type", "image/jpeg");
-                _c = (_b = res).send;
-                return [4 /*yield*/, generator_1.default.makeReportCard(data)];
-            case 2: return [2 /*return*/, _c.apply(_b, [_d.sent()])];
+                return [2 /*return*/, res.send(reportCard)];
         }
     });
 }); });
 function setFileName(name, session, title, district) {
-    return name.split(" ").join("_").split(".").join("_") + "_" + session + title.substring(0, 3).toLowerCase() + district + ".jpeg";
+    return (name
+        .split(" ")
+        .join("_")
+        .split(".")
+        .join("_") +
+        "_" +
+        session +
+        title.substring(0, 3).toLowerCase() +
+        district +
+        ".jpeg");
 }
-function getReportCard(session, title, district) {
+router.get("/raw", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+    var _a, name, district, Rhetoric, Voting, Donation, title, imgLink, session, grades, data, reportCard, fileName;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _a = req.query, name = _a.name, district = _a.district, Rhetoric = _a.Rhetoric, Voting = _a.Voting, Donation = _a.Donation, title = _a.title, imgLink = _a.imgLink, session = _a.session;
+                if (!(name && district && Rhetoric && Voting && Donation && imgLink)) return [3 /*break*/, 2];
+                grades = {
+                    Rhetoric: Rhetoric,
+                    Voting: Voting,
+                    Donation: Donation
+                };
+                data = {
+                    name: name,
+                    imgLink: imgLink,
+                    title: title,
+                    grades: grades,
+                    session: session,
+                    district: district
+                };
+                return [4 /*yield*/, generator_1.default.makeReportCard(data)];
+            case 1:
+                reportCard = _b.sent();
+                fileName = setFileName(name, session, title, district);
+                res.set("Content-disposition", "attachment; filename=" + fileName);
+                res.set("X-suggested-filename", fileName);
+                res.set("Content-Type", "image/jpeg");
+                return [2 /*return*/, res.send(reportCard)];
+            case 2:
+                res
+                    .status(400)
+                    .send("query must include name, district, Rhetoric, Voting, Donation, imgLink, title, and session");
+                _b.label = 3;
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+function getReportCard(session, title, district, id) {
     return __awaiter(this, void 0, void 0, function () {
-        var leg, data, _i, _a, grade, type, score;
+        var leg, leg, data, _i, _a, grade, type, score, fileName, reportCard;
         return __generator(this, function (_b) {
             switch (_b.label) {
-                case 0: return [4 /*yield*/, models_1.default.Legislator.findOne({
-                        where: {
-                            session: session, title: title, district: district
-                        },
-                        include: [models_1.default.Grade]
-                    })];
+                case 0:
+                    if (!id) return [3 /*break*/, 2];
+                    return [4 /*yield*/, db.sequelize.models.Legislator.findOne({
+                            where: {
+                                id: id
+                            },
+                            include: [db.sequelize.models.Grade]
+                        })];
                 case 1:
                     leg = _b.sent();
-                    console.log(leg.get("grades")[0].get("type"));
+                    return [3 /*break*/, 4];
+                case 2: return [4 /*yield*/, db.sequelize.models.Legislator.findOne({
+                        where: {
+                            session: session,
+                            title: title,
+                            district: district
+                        },
+                        include: [db.sequelize.models.Grade]
+                    })];
+                case 3:
+                    leg = _b.sent();
+                    _b.label = 4;
+                case 4:
                     data = {
                         imgLink: leg.get("imgLink"),
                         title: leg.get("title"),
-                        updatedAt: leg.get("updatedAt"),
                         name: leg.get("fullName"),
                         district: leg.get("district"),
                         session: leg.get("session"),
                         // @ts-ignore
                         grades: {}
                     };
-                    for (_i = 0, _a = leg.get("grades"); _i < _a.length; _i++) {
+                    for (_i = 0, _a = leg.get("Grades"); _i < _a.length; _i++) {
                         grade = _a[_i];
-                        type = grade.get('type');
+                        type = grade.get("type");
                         score = grade.get("grade");
-                        data.grades[type] = score;
+                        data.grades[type] = score || "";
                     }
-                    return [2 /*return*/, data];
+                    fileName = setFileName(data.name, data.session, data.title, data.district);
+                    return [4 /*yield*/, generator_1.default.makeReportCard(data)];
+                case 5:
+                    reportCard = _b.sent();
+                    console.log(reportCard);
+                    return [4 /*yield*/, leg.set("lastGenerated", new Date())];
+                case 6:
+                    _b.sent();
+                    return [4 /*yield*/, leg.save()];
+                case 7:
+                    _b.sent();
+                    return [2 /*return*/, { reportCard: reportCard, fileName: fileName }];
             }
         });
     });

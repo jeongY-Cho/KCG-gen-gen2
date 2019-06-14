@@ -34,28 +34,39 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var models_1 = require("../../models");
+var path_1 = require("path");
+var admin = __importStar(require("firebase-admin"));
+var db = require(path_1.join(process.cwd(), "/models"));
 var router = express_1.Router();
 router.get("/me", function (req, res) {
-    console.log(req);
     // @ts-ignore
-    return res.json(req.session.user);
+    if (req.session.isLoggedIn) {
+        return res.json(req.session.user);
+    }
+    else {
+        return res.sendStatus(401);
+    }
 });
 router.put("/me", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var user, _i, _a, _b, key, value, updatedUser, err_1;
     return __generator(this, function (_c) {
         switch (_c.label) {
-            case 0:
-                console.log(req.body);
-                return [4 /*yield*/, models_1.sequelize.models.user.findOne({
-                        where: {
-                            // @ts-ignore
-                            username: req.session.user.username
-                        }
-                    })];
+            case 0: return [4 /*yield*/, db.sequelize.models.user.findOne({
+                    where: {
+                        // @ts-ignore
+                        username: req.session.user.username
+                    }
+                })];
             case 1:
                 user = _c.sent();
                 _c.label = 2;
@@ -85,30 +96,39 @@ router.put("/me", function (req, res) { return __awaiter(_this, void 0, void 0, 
     });
 }); });
 router.post("/new", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-    var _a, username, email, authLevel, firstName, lastName, middleName, fullName, newUser, err_2;
+    var _a, username, email, firstName, lastName, middleName, token, fullName, decodedToken, newUser, err_2;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
                 console.log(req.body);
-                _a = req.body, username = _a.username, email = _a.email, authLevel = _a.authLevel, firstName = _a.firstName, lastName = _a.lastName, middleName = _a.middleName;
+                _a = req.body, username = _a.username, email = _a.email, firstName = _a.firstName, lastName = _a.lastName, middleName = _a.middleName, token = _a.token;
                 if (!middleName) {
-                    middleName = '';
+                    middleName = "";
                 }
-                fullName = "" + (firstName ? firstName + " " : '') + (middleName ? middleName.substring(0, 1) + ". " : '') + lastName;
-                _b.label = 1;
+                fullName = "" + (firstName ? firstName + " " : "") + (middleName ? middleName.substring(0, 1) + ". " : "") + lastName;
+                return [4 /*yield*/, admin.auth().verifyIdToken(token)];
             case 1:
-                _b.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, models_1.sequelize.models.user.create({
-                        username: username, fullName: fullName, email: email, authLevel: authLevel, firstName: firstName, lastName: lastName, middleName: middleName
-                    })];
+                decodedToken = _b.sent();
+                _b.label = 2;
             case 2:
+                _b.trys.push([2, 4, , 5]);
+                return [4 /*yield*/, db.sequelize.models.User.create({
+                        username: username,
+                        fullName: fullName,
+                        email: email,
+                        firstName: firstName,
+                        lastName: lastName,
+                        middleName: middleName,
+                        uid: decodedToken.uid
+                    })];
+            case 3:
                 newUser = _b.sent();
                 return [2 /*return*/, res.send(newUser)];
-            case 3:
+            case 4:
                 err_2 = _b.sent();
                 console.log(err_2);
                 return [2 /*return*/, res.status(400).send(err_2)];
-            case 4: return [2 /*return*/];
+            case 5: return [2 /*return*/];
         }
     });
 }); });
@@ -118,11 +138,11 @@ router.get("/:username", function (req, res) { return __awaiter(_this, void 0, v
         switch (_c.label) {
             case 0:
                 _b = (_a = res).send;
-                return [4 /*yield*/, models_1.sequelize.models.user.findOne({
+                return [4 /*yield*/, db.sequelize.models.user.findOne({
                         where: {
                             username: req.params.username
                         },
-                        include: [models_1.sequelize.models.update]
+                        include: [db.sequelize.models.update]
                     })];
             case 1: 
             // @ts-ignore
@@ -131,33 +151,45 @@ router.get("/:username", function (req, res) { return __awaiter(_this, void 0, v
     });
 }); });
 router.put("/:username", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-    var user, _i, _a, _b, key, value;
+    var user, err_3, _i, _a, _b, key, value;
     return __generator(this, function (_c) {
         switch (_c.label) {
-            case 0: return [4 /*yield*/, models_1.sequelize.models.user.findOne({
-                    where: {
-                        username: req.params.username
-                    }
-                })];
+            case 0:
+                _c.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, db.sequelize.models.user.findOne({
+                        where: {
+                            username: req.params.username
+                        }
+                    })];
             case 1:
                 user = _c.sent();
+                return [3 /*break*/, 3];
+            case 2:
+                err_3 = _c.sent();
+                return [2 /*return*/, res.status(400).send({
+                        error: err_3,
+                        reason: "NO SUCH USER WITH USERNAME: " + req.params.username
+                    })];
+            case 3:
                 if (req.session.user.get("authLevel") > user.get("authLevel")) {
-                    return [2 /*return*/, res.status(403).send({ reason: "User authentication level lower than target" })];
+                    return [2 /*return*/, res
+                            .status(403)
+                            .send({ reason: "User authentication level lower than target" })];
                 }
                 _i = 0, _a = Object.entries(req.body);
-                _c.label = 2;
-            case 2:
-                if (!(_i < _a.length)) return [3 /*break*/, 5];
-                _b = _a[_i], key = _b[0], value = _b[1];
-                return [4 /*yield*/, user.set(key, value)];
-            case 3:
-                _c.sent();
                 _c.label = 4;
             case 4:
-                _i++;
-                return [3 /*break*/, 2];
-            case 5: return [4 /*yield*/, user.save()];
+                if (!(_i < _a.length)) return [3 /*break*/, 7];
+                _b = _a[_i], key = _b[0], value = _b[1];
+                return [4 /*yield*/, user.set(key, value)];
+            case 5:
+                _c.sent();
+                _c.label = 6;
             case 6:
+                _i++;
+                return [3 /*break*/, 4];
+            case 7: return [4 /*yield*/, user.save()];
+            case 8:
                 _c.sent();
                 return [2 /*return*/, res.send(user)];
         }

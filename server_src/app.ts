@@ -1,82 +1,100 @@
 import Express, { NextFunction } from "express";
-import "dotenv/config"
-import models, { sequelize } from "./models";
-import routes from "./routes"
-import path from "path"
-import session from "express-session"
+import "dotenv/config";
+import { join } from "path";
+const db = require(join(process.cwd(), "/models"));
+import routes from "./routes";
+import path from "path";
+import session from "express-session";
 
-const app: Express.Application = Express()
+import * as admin from "firebase-admin";
 
-console.log(path.join(__dirname, "../client"));
+admin.initializeApp({
+  credential: admin.credential.cert({
+    projectId: "kcg-legislator-report-card",
+    privateKey: process.env.FIREBASE_PRIVATE_KEY,
+    clientEmail:
+      "firebase-adminsdk-hnddn@kcg-legislator-report-card.iam.gserviceaccount.com"
+  }),
+  databaseURL: "https://kcg-legislator-report-card.firebaseio.com"
+});
 
+const app: Express.Application = Express();
 
 // serve static files
-app.use(Express.static(path.join(__dirname, "../client")))
-
+app.use(Express.static(path.join(__dirname, "../client")));
 
 //middleware to get body
-app.use(session({
+app.use(
+  session({
     secret: "whatwhy",
     saveUninitialized: false,
     resave: true
-}))
+  })
+);
 
-
-app.use(Express.json())
-app.use(Express.urlencoded({ extended: true }))
+app.use(Express.json());
+app.use(Express.urlencoded({ extended: true }));
 
 // middleware for auth check on not GET requests
-let authCheck = (req, res, next) => {
-    console.log(req.method);
-    if (req.method !== "GET") {
-        if (req.session.isLoggedIn) {
-            next()
-        } else {
-            return res.sendStatus(401)
-        }
+export let authCheck = (req, res, next) => {
+  console.log(req.method);
+  console.log("session", req.session);
+  console.log("headers", req.headers);
+  if (req.method !== "GET") {
+    if (req.session.isLoggedIn) {
+      next();
+    } else if (req.originalUrl === "/api/user/new") {
+      next();
     } else {
-        next()
+      return res.sendStatus(401);
     }
-}
+  } else {
+    next();
+  }
+};
 
-// route for api 
-app.use("/api/user", authCheck, routes.user)
-app.use("/api/leg", authCheck, routes.leg)
+// route for api
+app.use("/api/user", authCheck, routes.user);
+app.use("/api/leg", authCheck, routes.leg);
 
-app.use("/generator", routes.generator)
+app.use("/generator", routes.generator);
 
 app.post("/login", async (req, res) => {
-    // @ts-ignore
-    if (req.session.isLoggedIn) {
-        return res.status(200).send()
-    }
-    // @ts-ignore
-    let user = await models.User.findOne({
-        where: {
-            username: req.body.username
-        }
-    })
+  if (process.env.NODE_ENV === "DEVELOPMENT" && req.headers.bypass) {
+    let user = await db.sequelize.models.User.findOne();
+    req.session.isLoggedIn = true;
+    req.session.user = user;
+    return res.status(200).send(user);
+  }
+  try {
+    var decodedToken = await admin.auth().verifyIdToken(req.body.token);
+  } catch (err) {
+    return res.status(400).send("Invalid Token");
+  }
 
-    if (user) {
-        req.session.isLoggedIn = true
-        req.session.user = user
-        res.status(201)
-        return res.send(user)
-    } else {
-        return res.sendStatus(400)
+  // @ts-ignore
+  let user = await db.sequelize.models.User.findOne({
+    where: {
+      uid: decodedToken.uid
     }
-})
+  });
+
+  if (user) {
+    req.session.user = user;
+    req.session.isLoggedIn = true;
+    return res.status(200).send(user);
+  } else {
+    return res.status(400).send("No such User");
+  }
+});
 
 app.post("/logout", async (req, res) => {
-    await req.session.destroy()
-    return res.sendStatus(200)
-})
-
-
+  await req.session.destroy();
+  return res.status(200).send("Logged out");
+});
 
 app.get("*", (req, res) => {
-    return res.sendFile(path.join(__dirname, "../client/index.html"))
-})
+  return res.sendFile(path.join(__dirname, "../client/index.html"));
+});
 
-
-export default app
+export default app;

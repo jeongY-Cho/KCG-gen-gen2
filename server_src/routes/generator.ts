@@ -1,116 +1,195 @@
-import { Router } from "express"
-import rateLimit from "express-rate-limit"
-import models, { sequelize } from "../models"
+import { Router } from "express";
+import rateLimit from "express-rate-limit";
+import { join } from "path";
+
+const db = require(join(process.cwd(), "/models"));
 import generator from "../generator";
 import { IReportCardData } from "../generator/generator";
+import { createWriteStream } from "fs";
 
-
-const router = Router()
-
+const router = Router();
 
 // @ts-ignore
-router.use(rateLimit({
-  max: 100,
-  headers: true,
-  handler: (req, res, next) => {
-    if (req.session.isLoggedIn) {
-      next()
-    } else {
-      res.staus(429).send("Too many requests, please try again later.")
-    }
-  }
-}))
-
-
-
-router.get("/", async (req, res) => {
+router.use(
   // @ts-ignore
-  let leg = await models.Legislator.findOne({
-    where: req.query,
-    include: [models.Grade]
+  rateLimit({
+    max: 100,
+    headers: true,
+    handler: (req, res, next) => {
+      if (req.session.isLoggedIn) {
+        next();
+      } else {
+        res.staus(429).send("Too many requests, please try again later.");
+      }
+    }
   })
-  console.log(leg);
+);
 
-  var data: IReportCardData = {
-    imgLink: leg.get("imgLink"),
-    title: leg.get("title"),
-    updatedAt: leg.get("updatedAt"),
-    name: leg.get("fullName"),
-    district: leg.get("district"),
-    // @ts-ignore
-    grades: {}
+// generate with query
+router.get("/", async (req, res) => {
+  let { session, title, district, id } = req.query;
+
+  try {
+    var { reportCard, fileName } = await getReportCard(
+      session,
+      title,
+      district,
+      id
+    );
+  } catch (err) {
+    return res.status(400).send({
+      error: err,
+      reason: `No Legislator with specified queries found. Queries: ${JSON.stringify(
+        req.query
+      )}`
+    });
   }
+  res.set("Content-disposition", "inline; filename=" + fileName);
+  res.set("Content-Type", "image/jpeg");
+  res.set("X-suggested-filename", fileName);
+  return res.send(reportCard);
+});
 
-  for (let grade of leg.get("grades")) {
-
-    let type = grade.get('type')
-    let score = grade.get("grade")
-    data.grades[type] = score
-  }
-
-  let fileName = setFileName(data.name, leg.get("session"), data.title, data.district)
-  console.log(fileName);
-
-  if (leg) {
-    res.set('Content-disposition', 'inline; filename=' + fileName);
-    res.set("Content-Type", "image/jpeg")
-    res.set("X-suggested-filename", fileName)
-    return res.send(await generator.makeReportCard(data))
-
-  } else {
-    return res.status(400).send({ reason: "No Legislator with specified queries found" })
-  }
-})
-
+// generate with params in url
 router.get("/:session/:title/:district", async (req, res) => {
-  let { session, title, district } = req.params
+  let { session, title, district } = req.params;
 
-  let data = await getReportCard(session, title, district)
+  try {
+    var { reportCard, fileName } = await getReportCard(
+      session,
+      title,
+      district
+    );
+  } catch (err) {
+    return res.status(400).send({
+      error: err,
+      reason: `No Legislator with specified queries found. Queries: ${JSON.stringify(
+        req.params
+      )}`
+    });
+  }
 
-  let fileName = setFileName(data.name, data.session, data.title, data.district)
-  res.set('Content-disposition', 'attachment; filename=' + fileName);
-  res.set("X-suggested-filename", fileName)
-  res.set("Content-Type", "image/jpeg")
-  return res.send(await generator.makeReportCard(data))
-})
+  res.set("Content-disposition", "attachment; filename=" + fileName);
+  res.set("X-suggested-filename", fileName);
+  res.set("Content-Type", "image/jpeg");
+  return res.send(reportCard);
+});
 
-
-function setFileName(name: string, session: number, title: string, district: number) {
-  return name.split(" ").join("_").split(".").join("_") + "_" + session + title.substring(0, 3).toLowerCase() + district + ".jpeg"
+function setFileName(
+  name: string,
+  session: number,
+  title: string,
+  district: number
+) {
+  return (
+    name
+      .split(" ")
+      .join("_")
+      .split(".")
+      .join("_") +
+    "_" +
+    session +
+    title.substring(0, 3).toLowerCase() +
+    district +
+    ".jpeg"
+  );
 }
 
-async function getReportCard(session: number, title: string, district: number) {
-  //@ts-ignore
-  let leg = await models.Legislator.findOne({
-    where: {
-      session, title, district
-    },
-    include: [models.Grade]
-  })
+router.get("/raw", async (req, res) => {
+  let {
+    name,
+    district,
+    Rhetoric,
+    Voting,
+    Donation,
+    title,
+    imgLink,
+    session
+  } = req.query;
 
-  console.log(leg.get("grades")[0].get("type"));
+  if (name && district && Rhetoric && Voting && Donation && imgLink) {
+    let grades = {
+      Rhetoric,
+      Voting,
+      Donation
+    };
+    let data: IReportCardData = {
+      name,
+      imgLink,
+      title,
+      grades,
+      session,
+      district
+    };
+
+    let reportCard = await generator.makeReportCard(data);
+    let fileName = setFileName(name, session, title, district);
+
+    res.set("Content-disposition", "attachment; filename=" + fileName);
+    res.set("X-suggested-filename", fileName);
+    res.set("Content-Type", "image/jpeg");
+    return res.send(reportCard);
+  } else {
+    res
+      .status(400)
+      .send(
+        "query must include name, district, Rhetoric, Voting, Donation, imgLink, title, and session"
+      );
+  }
+});
+
+async function getReportCard(
+  session: number,
+  title: string,
+  district: number,
+  id?: any
+) {
+  if (id) {
+    var leg = await db.sequelize.models.Legislator.findOne({
+      where: {
+        id: id
+      },
+      include: [db.sequelize.models.Grade]
+    });
+  } else {
+    var leg = await db.sequelize.models.Legislator.findOne({
+      where: {
+        session,
+        title,
+        district
+      },
+      include: [db.sequelize.models.Grade]
+    });
+  }
 
   var data: IReportCardData = {
     imgLink: leg.get("imgLink"),
     title: leg.get("title"),
-    updatedAt: leg.get("updatedAt"),
     name: leg.get("fullName"),
     district: leg.get("district"),
     session: leg.get("session"),
     // @ts-ignore
     grades: {}
+  };
+
+  for (let grade of leg.get("Grades")) {
+    let type = grade.get("type");
+    let score = grade.get("grade");
+    data.grades[type] = score || "";
   }
 
-  for (let grade of leg.get("grades")) {
+  let fileName = setFileName(
+    data.name,
+    data.session,
+    data.title,
+    data.district
+  );
+  let reportCard = await generator.makeReportCard(data);
+  console.log(reportCard);
 
-    let type = grade.get('type')
-    let score = grade.get("grade")
-    data.grades[type] = score
-  }
-
-  return data
+  await leg.set("lastGenerated", new Date());
+  await leg.save();
+  return { reportCard, fileName };
 }
 
-
-
-export default router
+export default router;
