@@ -28,7 +28,8 @@
     "jimp": "^0.6.4",
     "pg": "^7.11.0",
     "pg-hstore": "^2.3.2",
-    "sequelize": "^5.8.6"
+    "sequelize": "^5.8.6",
+    "sequelize-cli": "^5.5.0"
   },
   "engines": {
     "node": "10.15.3"
