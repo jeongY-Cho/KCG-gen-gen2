@@ -1,5 +1,7 @@
 import app from "./app";
-import db from "./models";
+
+import { join } from "path";
+const db = require(join(process.cwd(), "/models"));
 
 // reinstantiate database (ignored in prod, and testing)
 let force = false;
@@ -12,8 +14,6 @@ switch (process.env.NODE_ENV) {
     force = true;
   }
 }
-
-console.log(db);
 
 // initialize database connection
 db.sequelize.sync({ force: force }).then(async () => {

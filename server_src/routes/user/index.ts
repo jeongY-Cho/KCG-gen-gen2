@@ -1,18 +1,20 @@
 import { Router } from "express";
-import db from "./../../models";
+import { join } from "path";
+import * as admin from "firebase-admin";
+const db = require(join(process.cwd(), "/models"));
 
 const router = Router();
 
 router.get("/me", (req, res) => {
-  console.log(req);
-
   // @ts-ignore
-  return res.json(req.session.user);
+  if (req.session.isLoggedIn) {
+    return res.json(req.session.user);
+  } else {
+    return res.sendStatus(401);
+  }
 });
 
 router.put("/me", async (req, res) => {
-  console.log(req.body);
-
   // @ts-ignore
   let user = await db.sequelize.models.user.findOne({
     where: {
@@ -32,16 +34,25 @@ router.put("/me", async (req, res) => {
   }
 });
 
+interface INewUser {
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  token: string;
+}
+
 router.post("/new", async (req, res) => {
   console.log(req.body);
   let {
     username,
     email,
-    authLevel,
     firstName,
     lastName,
-    middleName
-  } = req.body;
+    middleName,
+    token
+  } = req.body as INewUser;
 
   if (!middleName) {
     middleName = "";
@@ -50,16 +61,17 @@ router.post("/new", async (req, res) => {
     middleName ? middleName.substring(0, 1) + ". " : ""
   }${lastName}`;
 
+  let decodedToken = await admin.auth().verifyIdToken(token);
   try {
     // @ts-ignore
-    let newUser = await db.sequelize.models.user.create({
+    let newUser = await db.sequelize.models.User.create({
       username,
       fullName,
       email,
-      authLevel,
       firstName,
       lastName,
-      middleName
+      middleName,
+      uid: decodedToken.uid
     });
     return res.send(newUser);
   } catch (err) {
@@ -82,12 +94,19 @@ router.get("/:username", async (req, res) => {
 });
 
 router.put("/:username", async (req, res) => {
-  // @ts-ignore
-  let user = await sequelize.models.user.findOne({
-    where: {
-      username: req.params.username
-    }
-  });
+  try {
+    var user = await db.sequelize.models.user.findOne({
+      where: {
+        username: req.params.username
+      }
+    });
+  } catch (err) {
+    return res.status(400).send({
+      error: err,
+      reason: `NO SUCH USER WITH USERNAME: ${req.params.username}`
+    });
+  }
+
   if (req.session.user.get("authLevel") > user.get("authLevel")) {
     return res
       .status(403)

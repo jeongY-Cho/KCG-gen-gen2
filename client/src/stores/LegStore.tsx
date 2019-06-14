@@ -38,6 +38,8 @@ export default class LegStore {
   @observable legs: ILeg[] = [];
   // @ts-ignore
   @observable current: ILeg = {};
+  @observable currentSession = 72;
+  @observable session = 72;
 
   @action.bound async getOne(id: string) {
     let response = await Axios.get("/api/leg", {

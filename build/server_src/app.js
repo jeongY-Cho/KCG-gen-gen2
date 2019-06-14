@@ -48,9 +48,10 @@ var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
 require("dotenv/config");
-var models_1 = __importDefault(require("./models"));
+var path_1 = require("path");
+var db = require(path_1.join(process.cwd(), "/models"));
 var routes_1 = __importDefault(require("./routes"));
-var path_1 = __importDefault(require("path"));
+var path_2 = __importDefault(require("path"));
 var express_session_1 = __importDefault(require("express-session"));
 var admin = __importStar(require("firebase-admin"));
 admin.initializeApp({
@@ -63,7 +64,7 @@ admin.initializeApp({
 });
 var app = express_1.default();
 // serve static files
-app.use(express_1.default.static(path_1.default.join(__dirname, "../client")));
+app.use(express_1.default.static(path_2.default.join(__dirname, "../client")));
 //middleware to get body
 app.use(express_session_1.default({
     secret: "whatwhy",
@@ -73,10 +74,15 @@ app.use(express_session_1.default({
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 // middleware for auth check on not GET requests
-var authCheck = function (req, res, next) {
+exports.authCheck = function (req, res, next) {
     console.log(req.method);
+    console.log("session", req.session);
+    console.log("headers", req.headers);
     if (req.method !== "GET") {
         if (req.session.isLoggedIn) {
+            next();
+        }
+        else if (req.originalUrl === "/api/user/new") {
             next();
         }
         else {
@@ -88,28 +94,36 @@ var authCheck = function (req, res, next) {
     }
 };
 // route for api
-app.use("/api/user", authCheck, routes_1.default.user);
-app.use("/api/leg", authCheck, routes_1.default.leg);
+app.use("/api/user", exports.authCheck, routes_1.default.user);
+app.use("/api/leg", exports.authCheck, routes_1.default.leg);
 app.use("/generator", routes_1.default.generator);
 app.post("/login", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-    var decodedToken, err_1, user;
+    var user_1, decodedToken, err_1, user;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, admin.auth().verifyIdToken(req.body)];
+                if (!(process.env.NODE_ENV === "DEVELOPMENT" && req.headers.bypass)) return [3 /*break*/, 2];
+                return [4 /*yield*/, db.sequelize.models.User.findOne()];
             case 1:
-                decodedToken = _a.sent();
-                return [3 /*break*/, 3];
+                user_1 = _a.sent();
+                req.session.isLoggedIn = true;
+                req.session.user = user_1;
+                return [2 /*return*/, res.status(200).send(user_1)];
             case 2:
+                _a.trys.push([2, 4, , 5]);
+                return [4 /*yield*/, admin.auth().verifyIdToken(req.body.token)];
+            case 3:
+                decodedToken = _a.sent();
+                return [3 /*break*/, 5];
+            case 4:
                 err_1 = _a.sent();
-                return [2 /*return*/, res.send(400).send("Invalid Token")];
-            case 3: return [4 /*yield*/, models_1.default.sequelize.models.User.findOne({
+                return [2 /*return*/, res.status(400).send("Invalid Token")];
+            case 5: return [4 /*yield*/, db.sequelize.models.User.findOne({
                     where: {
                         uid: decodedToken.uid
                     }
                 })];
-            case 4:
+            case 6:
                 user = _a.sent();
                 if (user) {
                     req.session.user = user;
@@ -134,6 +148,6 @@ app.post("/logout", function (req, res) { return __awaiter(_this, void 0, void 0
     });
 }); });
 app.get("*", function (req, res) {
-    return res.sendFile(path_1.default.join(__dirname, "../client/index.html"));
+    return res.sendFile(path_2.default.join(__dirname, "../client/index.html"));
 });
 exports.default = app;

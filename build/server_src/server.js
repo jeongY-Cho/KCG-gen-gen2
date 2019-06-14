@@ -40,7 +40,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var app_1 = __importDefault(require("./app"));
-var models_1 = __importDefault(require("./models"));
+var path_1 = require("path");
+var db = require(path_1.join(process.cwd(), "/models"));
 // reinstantiate database (ignored in prod, and testing)
 var force = false;
 switch (process.env.NODE_ENV) {
@@ -51,9 +52,8 @@ switch (process.env.NODE_ENV) {
         force = true;
     }
 }
-console.log(models_1.default);
 // initialize database connection
-models_1.default.sequelize.sync({ force: force }).then(function () { return __awaiter(_this, void 0, void 0, function () {
+db.sequelize.sync({ force: force }).then(function () { return __awaiter(_this, void 0, void 0, function () {
     return __generator(this, function (_a) {
         app_1.default.listen(process.env.PORT, function () {
             console.log("listening on port " + process.env.PORT);

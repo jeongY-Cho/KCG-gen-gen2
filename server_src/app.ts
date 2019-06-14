@@ -1,6 +1,7 @@
 import Express, { NextFunction } from "express";
 import "dotenv/config";
-import db from "./models";
+import { join } from "path";
+const db = require(join(process.cwd(), "/models"));
 import routes from "./routes";
 import path from "path";
 import session from "express-session";
@@ -35,10 +36,14 @@ app.use(Express.json());
 app.use(Express.urlencoded({ extended: true }));
 
 // middleware for auth check on not GET requests
-let authCheck = (req, res, next) => {
+export let authCheck = (req, res, next) => {
   console.log(req.method);
+  console.log("session", req.session);
+  console.log("headers", req.headers);
   if (req.method !== "GET") {
     if (req.session.isLoggedIn) {
+      next();
+    } else if (req.originalUrl === "/api/user/new") {
       next();
     } else {
       return res.sendStatus(401);
@@ -55,11 +60,16 @@ app.use("/api/leg", authCheck, routes.leg);
 app.use("/generator", routes.generator);
 
 app.post("/login", async (req, res) => {
-  let decodedToken: admin.auth.DecodedIdToken;
+  if (process.env.NODE_ENV === "DEVELOPMENT" && req.headers.bypass) {
+    let user = await db.sequelize.models.User.findOne();
+    req.session.isLoggedIn = true;
+    req.session.user = user;
+    return res.status(200).send(user);
+  }
   try {
-    decodedToken = await admin.auth().verifyIdToken(req.body);
+    var decodedToken = await admin.auth().verifyIdToken(req.body.token);
   } catch (err) {
-    return res.send(400).send("Invalid Token");
+    return res.status(400).send("Invalid Token");
   }
 
   // @ts-ignore

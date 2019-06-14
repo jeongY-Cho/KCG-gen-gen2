@@ -45,20 +45,16 @@ var Generator = /** @class */ (function () {
         this.config = config;
         // @ts-ignore
         this.fonts = {};
-        jimp_1.default.loadFont(config.fonts.large)
-            .then(function (font) {
+        jimp_1.default.loadFont(config.fonts.large).then(function (font) {
             _this.fonts.large = font;
         });
-        jimp_1.default.loadFont(config.fonts.medium)
-            .then(function (font) {
+        jimp_1.default.loadFont(config.fonts.medium).then(function (font) {
             _this.fonts.medium = font;
         });
-        jimp_1.default.loadFont(config.fonts.small)
-            .then(function (font) {
+        jimp_1.default.loadFont(config.fonts.small).then(function (font) {
             _this.fonts.small = font;
         });
-        jimp_1.default.loadFont(config.fonts.xsmall)
-            .then(function (font) {
+        jimp_1.default.loadFont(config.fonts.xsmall).then(function (font) {
             _this.fonts.xsmall = font;
         });
     }
@@ -67,14 +63,18 @@ var Generator = /** @class */ (function () {
             var portrait, template, scaledPortrait, reportCard, cardWithText, bufferedCard;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, jimp_1.default.read(data.imgLink)];
+                    case 0:
+                        console.log(data);
+                        return [4 /*yield*/, jimp_1.default.read(data.imgLink)];
                     case 1:
                         portrait = _a.sent();
                         return [4 /*yield*/, jimp_1.default.read(this.config.template)];
                     case 2:
                         template = _a.sent();
                         scaledPortrait = portrait.cover(this.config.loc.portraitScale[0], this.config.loc.portraitScale[1]);
-                        reportCard = template.composite(scaledPortrait, this.config.loc.portrait[0], this.config.loc.portrait[1], { mode: jimp_1.default.BLEND_DESTINATION_OVER });
+                        reportCard = template.composite(scaledPortrait, this.config.loc.portrait[0], this.config.loc.portrait[1], 
+                        //@ts-ignore
+                        { mode: jimp_1.default.BLEND_DESTINATION_OVER });
                         cardWithText = this.printText(reportCard, data);
                         return [4 /*yield*/, cardWithText.getBufferAsync(jimp_1.default.MIME_JPEG)];
                     case 3:
@@ -86,9 +86,9 @@ var Generator = /** @class */ (function () {
     };
     Generator.prototype.printText = function (templateObj, data) {
         var date = new Date(Date.now());
-        var strfdate = date.toLocaleString('en-US', {
+        var strfdate = date.toLocaleString("en-US", {
             year: "numeric",
-            month: "long",
+            month: "long"
         });
         var updatedStr = "Updated: " + strfdate;
         var d = jimp_1.default.measureText(this.fonts.xsmall, updatedStr);
@@ -103,14 +103,14 @@ var Generator = /** @class */ (function () {
                 break;
             }
         }
-        return templateObj
+        return (templateObj
             .print(this.fonts.medium, this.config.loc.name[0], this.config.loc.name[1], data.name, this.config.nameMaxWidth)
             .print(this.fonts.xsmall, this.config.loc.updated[0] - d, this.config.loc.updated[1], updatedStr)
             // @ts-ignore
             .print(this.fonts.medium, this.config.loc.district[0], this.config.loc.district[1], districtStr)
-            .print(this.fonts.large, this.config.loc.voting[0], this.config.loc.voting[1], data.grades.voting)
-            .print(this.fonts.large, this.config.loc.rhetoric[0], this.config.loc.rhetoric[1], data.grades.rhetoric)
-            .print(this.fonts.large, this.config.loc.donation[0], this.config.loc.donation[1], data.grades.donation);
+            .print(this.fonts.large, this.config.loc.voting[0], this.config.loc.voting[1], data.grades.Voting)
+            .print(this.fonts.large, this.config.loc.rhetoric[0], this.config.loc.rhetoric[1], data.grades.Rhetoric)
+            .print(this.fonts.large, this.config.loc.donation[0], this.config.loc.donation[1], data.grades.Donation));
     };
     return Generator;
 }());
