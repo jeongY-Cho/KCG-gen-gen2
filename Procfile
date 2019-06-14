@@ -1,2 +1,2 @@
-web: node build/server_src/app.js
+web: npm start
 release: sequelize db:migrate
