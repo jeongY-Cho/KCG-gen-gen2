@@ -1,0 +1,1 @@
+{"version":3,"sources":["App.css"],"names":[],"mappings":"AAAA,EACE,QAAS,CACT,SACF,CAMA,6BACE,eACF","file":"main.58ae371f.chunk.css","sourcesContent":["* {\r\n  margin: 0;\r\n  padding: 0\r\n}\r\n\r\ninput:invalid {\r\n  background: pink;\r\n}\r\n\r\nselecT:invalid {\r\n  background: pink;\r\n}"]}

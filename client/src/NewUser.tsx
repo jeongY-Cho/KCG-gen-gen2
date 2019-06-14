@@ -225,7 +225,7 @@ const InputField: React.FC<{
         </label>
       )}
       <input
-        type={id}
+        type={value}
         className="form-control"
         id={id}
         onChange={onChange}
