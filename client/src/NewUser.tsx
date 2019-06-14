@@ -204,7 +204,8 @@ const InputField: React.FC<{
   label,
   placeholder = "",
   required = false,
-  children
+  children,
+  type
 }) => {
   let formattedPlaceholder: string;
   if (placeholder) {
@@ -225,7 +226,7 @@ const InputField: React.FC<{
         </label>
       )}
       <input
-        type={value}
+        type={type}
         className="form-control"
         id={id}
         onChange={onChange}
