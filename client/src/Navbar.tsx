@@ -23,7 +23,7 @@ export class Navbar extends Component<INavbarProps> {
         <button onClick={() => this.props.history.push("/new")}>
           New User
         </button>
-        <button onClick={() => this.props.history.push("/leg.")}>legs</button>
+        <button onClick={() => this.props.history.push("/leg")}>legs</button>
         <button onClick={() => this.props.history.push("/leg/new")}>
           New leg
         </button>
